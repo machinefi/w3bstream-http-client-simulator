@@ -1,0 +1,17 @@
+{
+  "name": "w3bstream-http-client-simulator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Nicky Ru <64008830+nicky-ru@users.noreply.github.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.0.5",
+    "typescript": "^5.0.2"
+  }
+}
