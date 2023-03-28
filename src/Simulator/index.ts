@@ -1,53 +1,36 @@
-import fs from "fs";
-import path from "path";
-
 import { IdGenerator } from "../IdGenerator";
-import { Keys } from "../types";
+import { IdFileManager } from "../IdFileManager";
 
 export class Simulator {
   private _privateKey: string = "";
   public publicKey: string = "";
 
   constructor(pathToPrivateKey?: string) {
-    this.initializeFromPath(pathToPrivateKey ?? "./");
+    this.initFromPathOrGenerateNew(pathToPrivateKey ?? "./");
   }
 
-  private initializeFromPath(pathToPrivateKey: string): void {
-    this._privateKey = this.getPrivateKeyFromPath(pathToPrivateKey);
-    this.publicKey = this.derivePublicKey();
+  sign(): string {
+    return this._privateKey;
   }
 
-  private initializeNewId(): void {
-    const keys = this.generateNewId();
-    this._privateKey = keys.privateKey;
-    this.publicKey = keys.publicKey;
-
-    this.savePrivateKey();
-  }
-
-  private getPrivateKeyFromPath(pathToPrivateKey: string): string {
+  private initFromPathOrGenerateNew(pathToPk: string): void {
     try {
-      const privateKey = fs.readFileSync(
-        path.join(pathToPrivateKey, "private.key")
-      );
-      return privateKey.toString();
-    } catch (err) {
+      const privateKey = IdFileManager.getPrivateKeyFromPath(pathToPk);
+      const publicKey = IdGenerator.derivePublicKey(privateKey);
+      this.updateId(privateKey, publicKey);
+    } catch (err: any) {
       this.initializeNewId();
-      return this._privateKey;
     }
   }
 
-  private derivePublicKey(): string {
-    const keys = IdGenerator.generateFromPk(this._privateKey);
-    return keys.publicKey;
+  private initializeNewId(): void {
+    const { privateKey, publicKey } = IdGenerator.generateId();
+    this.updateId(privateKey, publicKey);
+    IdFileManager.savePrivateKey(privateKey);
   }
 
-  private generateNewId(): Keys {
-    return IdGenerator.generateId();
-  }
-
-  private savePrivateKey(): void {
-    const privateKey = this._privateKey;
-    fs.writeFileSync(path.join("./", "private.key"), privateKey);
+  private updateId(pk: string, pubk: string): void {
+    this._privateKey = pk;
+    this.publicKey = pubk;
   }
 }
