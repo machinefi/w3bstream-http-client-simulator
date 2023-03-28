@@ -15,12 +15,9 @@ export class IdGenerator {
     };
   }
 
-  static generateFromPk(privateKey: string): Keys {
+  static derivePublicKey(privateKey: string): string {
     const ecdh = crypto.createECDH(curveName);
     ecdh.setPrivateKey(privateKey, "hex");
-    return {
-      publicKey: ecdh.getPublicKey("hex"),
-      privateKey: ecdh.getPrivateKey("hex"),
-    };
+    return ecdh.getPublicKey("hex");
   }
 }

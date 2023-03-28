@@ -16,9 +16,8 @@ describe("IdGenerator", () => {
     expect(keys).toHaveProperty("privateKey");
   });
   it("should generate id from private key", () => {
-    const keys = IdGenerator.generateFromPk(EXAMPLE_PRIVATE_KEY);
+    const publicKey = IdGenerator.derivePublicKey(EXAMPLE_PRIVATE_KEY);
 
-    expect(keys.publicKey).toEqual(EXAMPLE_PUBLIC_KEY);
-    expect(keys.privateKey).toEqual(EXAMPLE_PRIVATE_KEY);
+    expect(publicKey).toEqual(EXAMPLE_PUBLIC_KEY);
   });
 });
