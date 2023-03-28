@@ -11,15 +11,12 @@ describe("IdGenerator", () => {
     expect(idGenerator).toBeInstanceOf(IdGenerator);
   });
   it("should generate an id", () => {
-    const idGenerator = new IdGenerator();
-    const keys = idGenerator.generateId();
+    const keys = IdGenerator.generateId();
     expect(keys).toHaveProperty("publicKey");
     expect(keys).toHaveProperty("privateKey");
   });
   it("should generate id from private key", () => {
-    const idGenerator = new IdGenerator();
-
-    const keys = idGenerator.generateFromPk(EXAMPLE_PRIVATE_KEY);
+    const keys = IdGenerator.generateFromPk(EXAMPLE_PRIVATE_KEY);
 
     expect(keys.publicKey).toEqual(EXAMPLE_PUBLIC_KEY);
     expect(keys.privateKey).toEqual(EXAMPLE_PRIVATE_KEY);

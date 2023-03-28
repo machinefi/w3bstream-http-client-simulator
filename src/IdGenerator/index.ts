@@ -1,16 +1,12 @@
 import crypto from "crypto";
+import { Keys } from "src/types";
 
 const curveName = "prime256v1";
-
-type Keys = {
-  publicKey: string;
-  privateKey: string;
-};
 
 export class IdGenerator {
   constructor() {}
 
-  generateId(): Keys {
+  static generateId(): Keys {
     const ecdh = crypto.createECDH(curveName);
     ecdh.generateKeys();
     return {
@@ -19,7 +15,7 @@ export class IdGenerator {
     };
   }
 
-  generateFromPk(privateKey: string): Keys {
+  static generateFromPk(privateKey: string): Keys {
     const ecdh = crypto.createECDH(curveName);
     ecdh.setPrivateKey(privateKey, "hex");
     return {
