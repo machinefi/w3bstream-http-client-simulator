@@ -18,4 +18,13 @@ export class IdGenerator {
       privateKey: ecdh.getPrivateKey("hex"),
     };
   }
+
+  generateFromPk(privateKey: string): Keys {
+    const ecdh = crypto.createECDH(curveName);
+    ecdh.setPrivateKey(privateKey, "hex");
+    return {
+      publicKey: ecdh.getPublicKey("hex"),
+      privateKey: ecdh.getPrivateKey("hex"),
+    };
+  }
 }
