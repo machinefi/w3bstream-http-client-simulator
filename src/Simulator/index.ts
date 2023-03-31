@@ -4,11 +4,7 @@ import { SimulatorKeys } from "../SimulatorKeys";
 import { PrivateKeyFile } from "../PrivateKeyFile";
 import { Message, Payload } from "../types";
 
-class NoDataPointGeneratorError extends Error {
-  constructor() {
-    super("No data point generator has been set");
-  }
-}
+class NoDataPointGeneratorError extends Error {}
 
 export class Simulator {
   private _privateKey: string = "";
@@ -22,14 +18,9 @@ export class Simulator {
     this.initFromPathOrGenerateNew(pathToPrivateKey ?? "./");
   }
 
-  set dataPointGenerator(generator: DataPointGenerator<any>) {
-    this._dataPointGenerator = generator;
-  }
-
   generateSingleMessage(): Message {
-    const payload = this.generatePayload();
-    const payloadString = JSON.stringify(payload);
-    const payloadBase64 = Buffer.from(payloadString).toString("base64");
+    const payloadBase64 = this.generateAndEncodePayload();
+
     return {
       header: {
         pub_id: this.pub_id,
@@ -38,6 +29,10 @@ export class Simulator {
       },
       payload: payloadBase64,
     };
+  }
+
+  set dataPointGenerator(generator: DataPointGenerator<any>) {
+    this._dataPointGenerator = generator;
   }
 
   private initFromPathOrGenerateNew(pathToPk: string): void {
@@ -60,21 +55,29 @@ export class Simulator {
     const { privateKey, publicKey } = SimulatorKeys.generateKeys();
 
     this.updateId(privateKey, publicKey);
-    
+
     PrivateKeyFile.save(privateKey);
+  }
+
+  private generateAndEncodePayload(): string {
+    const payload = this.generatePayload();
+    const payloadString = JSON.stringify(payload);
+    return Buffer.from(payloadString).toString("base64");
   }
 
   private generatePayload(): Payload {
     const dataPoint = this.generateDataPoint();
+    const signature = this.signDataPoint(dataPoint);
 
     return {
       data: dataPoint,
       public_key: this.publicKey,
-      signature: SimulatorSigner.sign(
-        JSON.stringify(dataPoint),
-        this._privateKey
-      ),
+      signature,
     };
+  }
+
+  private signDataPoint(dataPoint: any): string {
+    return SimulatorSigner.sign(JSON.stringify(dataPoint), this._privateKey);
   }
 
   private generateDataPoint() {
