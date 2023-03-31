@@ -1,6 +1,8 @@
 import path from "path";
 import fs from "fs";
 
+import axios from "axios";
+
 import { Simulator } from ".";
 import { DataPointGenerator } from "../DataPointGenerator";
 import { DataPoint, Payload } from "./../types";
@@ -36,6 +38,7 @@ const PUB_ID_1 = "pub_id_1";
 const PUB_ID_2 = "pub_id_2";
 const PUB_TOKEN_1 = "pub_token_1";
 const PUB_TOKEN_2 = "pub_token_2";
+const W3BSTREAM_ENDPOINT = "http://localhost:3000";
 
 let simulator1: Simulator;
 let simulator2: Simulator;
@@ -53,7 +56,7 @@ const timestampGenerator = (): number => Date.now();
 describe("Simulator", () => {
   describe("Initialization", () => {
     beforeEach(() => {
-      simulator1 = new Simulator(PUB_ID_1, PUB_TOKEN_1);
+      simulator1 = new Simulator(PUB_ID_1, PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
       simulator1.init();
       publicKey1 = simulator1.publicKey;
     });
@@ -67,7 +70,7 @@ describe("Simulator", () => {
       const newPath = "./testing-simulator1/new-path";
       movePkFile("./", newPath);
 
-      simulator2 = new Simulator(PUB_ID_2, PUB_TOKEN_2);
+      simulator2 = new Simulator(PUB_ID_2, PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
       simulator2.init(newPath);
 
       publicKey2 = simulator2.publicKey;
@@ -80,7 +83,7 @@ describe("Simulator", () => {
       expect(publicKey1.length).toEqual(130);
     });
     it("should create new id if path to file is wrong", () => {
-      simulator2 = new Simulator(PUB_ID_2, PUB_TOKEN_2);
+      simulator2 = new Simulator(PUB_ID_2, PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
       simulator2.init("./wrong-path");
       publicKey2 = simulator2.publicKey;
 
@@ -93,16 +96,16 @@ describe("Simulator", () => {
       expect(privateKey.length).toEqual(64);
     });
     it("should reuse private.key file if one is provided", () => {
-      simulator2 = new Simulator(PUB_ID_2, PUB_TOKEN_2);
+      simulator2 = new Simulator(PUB_ID_2, PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
       simulator2.init();
       publicKey2 = simulator2.publicKey;
 
       expect(publicKey1).toEqual(publicKey2);
     });
   });
-  describe("Payload generation", () => {
+  describe("Message generation", () => {
     beforeEach(() => {
-      simulator1 = new Simulator(PUB_ID_1, PUB_TOKEN_1);
+      simulator1 = new Simulator(PUB_ID_1, PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
       simulator1.init();
     });
     afterEach(() => {
@@ -201,6 +204,29 @@ describe("Simulator", () => {
 
       const signature = payload.signature;
       expect(signature.length).toBeGreaterThan(0);
+    });
+  });
+  describe("Sending messages", () => {
+    it("should send a message", () => {
+      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
+        () => ({
+          temperature: randomizer(),
+          timestamp: timestampGenerator(),
+        })
+      );
+      simulator1 = new Simulator(PUB_ID_1, PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
+      simulator1.init();
+      simulator1.dataPointGenerator = dataGenerator;
+
+      jest.spyOn(axios, "post").mockImplementation(() => {
+        return Promise.resolve({ status: 200 });
+      });
+
+      const res = simulator1.sendSingleMessage();
+
+      expect(axios.post).toHaveBeenCalled();
+
+      expect(res).resolves.toEqual({ status: 200 });
     });
   });
 });

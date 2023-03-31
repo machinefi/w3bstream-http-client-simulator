@@ -1,3 +1,5 @@
+import axios, { AxiosResponse } from "axios";
+
 import { SimulatorSigner } from "../SimulatorSigner";
 import { DataPointGenerator } from "../DataPointGenerator";
 import { SimulatorKeys } from "../SimulatorKeys";
@@ -5,6 +7,7 @@ import { PrivateKeyFile } from "../PrivateKeyFile";
 import { Message, Payload } from "../types";
 
 class NoDataPointGeneratorError extends Error {}
+class SendingMessageError extends Error {}
 
 abstract class BaseSimulator {
   protected _privateKey: string = "";
@@ -12,11 +15,17 @@ abstract class BaseSimulator {
 
   public publicKey: string = "";
 
-  constructor(protected pub_id: string, protected pub_token: string) {}
+  constructor(
+    protected pub_id: string,
+    protected pub_token: string,
+    protected w3bstream_endpoint: string
+  ) {}
 
   abstract init(pathToPrivateKey?: string): void;
 
   abstract generateSingleMessage(): Message;
+
+  abstract sendSingleMessage(): Promise<AxiosResponse | undefined>;
 
   set dataPointGenerator(generator: DataPointGenerator<any>) {
     this._dataPointGenerator = generator;
@@ -24,8 +33,8 @@ abstract class BaseSimulator {
 }
 
 export class Simulator extends BaseSimulator {
-  constructor(pub_id: string, pub_token: string) {
-    super(pub_id, pub_token);
+  constructor(pub_id: string, pub_token: string, w3bstream_endpoint: string) {
+    super(pub_id, pub_token, w3bstream_endpoint);
   }
 
   init(pathToPrivateKey?: string) {
@@ -43,6 +52,20 @@ export class Simulator extends BaseSimulator {
       },
       payload: payloadBase64,
     };
+  }
+
+  async sendSingleMessage(): Promise<AxiosResponse | undefined> {
+    const message = this.generateSingleMessage();
+
+    try {
+      const result = await axios.post(this.w3bstream_endpoint, message);
+      if (result.status !== 200) {
+        throw new SendingMessageError(result.data);
+      }
+      return result;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   set dataPointGenerator(generator: DataPointGenerator<any>) {
