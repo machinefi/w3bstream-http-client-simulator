@@ -44,10 +44,24 @@ export class Simulator {
     try {
       const privateKey = PrivateKeyFile.getFromPath(pathToPk);
       const publicKey = SimulatorKeys.derivePublicKey(privateKey);
+
       this.updateId(privateKey, publicKey);
     } catch (err: any) {
       this.initializeNewId();
     }
+  }
+
+  private updateId(pk: string, pubk: string): void {
+    this._privateKey = pk;
+    this.publicKey = pubk;
+  }
+
+  private initializeNewId(): void {
+    const { privateKey, publicKey } = SimulatorKeys.generateKeys();
+
+    this.updateId(privateKey, publicKey);
+    
+    PrivateKeyFile.save(privateKey);
   }
 
   private generatePayload(): Payload {
@@ -68,16 +82,5 @@ export class Simulator {
       throw new NoDataPointGeneratorError();
     }
     return this._dataPointGenerator.generateDataPoint();
-  }
-
-  private initializeNewId(): void {
-    const { privateKey, publicKey } = SimulatorKeys.generateId();
-    this.updateId(privateKey, publicKey);
-    PrivateKeyFile.save(privateKey);
-  }
-
-  private updateId(pk: string, pubk: string): void {
-    this._privateKey = pk;
-    this.publicKey = pubk;
   }
 }

@@ -7,7 +7,7 @@ const ecdh = crypto.createECDH(curveName);
 export class SimulatorKeys {
   constructor() {}
 
-  static generateId(): Keys {
+  static generateKeys(): Keys {
     ecdh.generateKeys();
 
     return {
@@ -18,7 +18,7 @@ export class SimulatorKeys {
 
   static derivePublicKey(privateKey: string): string {
     ecdh.setPrivateKey(privateKey, "hex");
-    
+
     return ecdh.getPublicKey("hex");
   }
 }

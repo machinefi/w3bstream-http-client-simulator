@@ -11,7 +11,7 @@ describe("IdGenerator", () => {
     expect(idGenerator).toBeInstanceOf(SimulatorKeys);
   });
   it("should generate an id", () => {
-    const keys = SimulatorKeys.generateId();
+    const keys = SimulatorKeys.generateKeys();
     expect(keys).toHaveProperty("publicKey");
     expect(keys).toHaveProperty("privateKey");
   });
