@@ -1,7 +1,7 @@
 import { SimulatorSigner } from "../SimulatorSigner";
 import { DataPointGenerator } from "../DataPointGenerator";
 import { IdGenerator } from "../IdGenerator";
-import { IdFileManager } from "../IdFileManager";
+import { PrivateKeyFile } from "../PrivateKeyFile";
 import { Message, Payload } from "../types";
 
 class NoDataPointGeneratorError extends Error {
@@ -40,6 +40,16 @@ export class Simulator {
     };
   }
 
+  private initFromPathOrGenerateNew(pathToPk: string): void {
+    try {
+      const privateKey = PrivateKeyFile.getFromPath(pathToPk);
+      const publicKey = IdGenerator.derivePublicKey(privateKey);
+      this.updateId(privateKey, publicKey);
+    } catch (err: any) {
+      this.initializeNewId();
+    }
+  }
+
   private generatePayload(): Payload {
     const dataPoint = this.generateDataPoint();
 
@@ -60,20 +70,10 @@ export class Simulator {
     return this._dataPointGenerator.generateDataPoint();
   }
 
-  private initFromPathOrGenerateNew(pathToPk: string): void {
-    try {
-      const privateKey = IdFileManager.getPrivateKeyFromPath(pathToPk);
-      const publicKey = IdGenerator.derivePublicKey(privateKey);
-      this.updateId(privateKey, publicKey);
-    } catch (err: any) {
-      this.initializeNewId();
-    }
-  }
-
   private initializeNewId(): void {
     const { privateKey, publicKey } = IdGenerator.generateId();
     this.updateId(privateKey, publicKey);
-    IdFileManager.savePrivateKey(privateKey);
+    PrivateKeyFile.save(privateKey);
   }
 
   private updateId(pk: string, pubk: string): void {
