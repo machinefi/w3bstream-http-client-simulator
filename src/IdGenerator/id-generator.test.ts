@@ -1,4 +1,4 @@
-import { IdGenerator } from ".";
+import { SimulatorKeys } from ".";
 
 const EXAMPLE_PRIVATE_KEY =
   "21ab5d1b4a6d52e55e93283d724617f5f6a33421f14604540719111b8d125802";
@@ -7,16 +7,16 @@ const EXAMPLE_PUBLIC_KEY =
 
 describe("IdGenerator", () => {
   it("should initialize", () => {
-    const idGenerator = new IdGenerator();
-    expect(idGenerator).toBeInstanceOf(IdGenerator);
+    const idGenerator = new SimulatorKeys();
+    expect(idGenerator).toBeInstanceOf(SimulatorKeys);
   });
   it("should generate an id", () => {
-    const keys = IdGenerator.generateId();
+    const keys = SimulatorKeys.generateId();
     expect(keys).toHaveProperty("publicKey");
     expect(keys).toHaveProperty("privateKey");
   });
   it("should generate id from private key", () => {
-    const publicKey = IdGenerator.derivePublicKey(EXAMPLE_PRIVATE_KEY);
+    const publicKey = SimulatorKeys.derivePublicKey(EXAMPLE_PRIVATE_KEY);
 
     expect(publicKey).toEqual(EXAMPLE_PUBLIC_KEY);
   });
