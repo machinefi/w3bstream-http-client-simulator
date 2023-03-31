@@ -12,6 +12,7 @@ class SendingMessageError extends Error {}
 abstract class BaseSimulator {
   protected _privateKey: string = "";
   protected _dataPointGenerator: DataPointGenerator<any> | undefined;
+  protected _interval: NodeJS.Timeout | undefined;
 
   public publicKey: string = "";
 
@@ -52,6 +53,20 @@ export class Simulator extends BaseSimulator {
       },
       payload: payloadBase64,
     };
+  }
+
+  powerOn(intervalInSec: number): void {
+    const intervalInMs = intervalInSec * 1000;
+
+    this._interval = setInterval(async () => {
+      this.sendSingleMessage();
+    }, intervalInMs);
+  }
+
+  powerOff(): void {
+    if (this._interval) {
+      clearInterval(this._interval);
+    }
   }
 
   async sendSingleMessage(): Promise<AxiosResponse | undefined> {

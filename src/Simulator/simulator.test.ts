@@ -34,6 +34,9 @@ const extractDataPointFromPayload = (payload: string): Partial<DataPoint> => {
   return decodedPayload.data;
 };
 
+const wait = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 const PUB_ID_1 = "pub_id_1";
 const PUB_ID_2 = "pub_id_2";
 const PUB_TOKEN_1 = "pub_token_1";
@@ -207,17 +210,22 @@ describe("Simulator", () => {
     });
   });
   describe("Sending messages", () => {
-    it("should send a single message", () => {
+    beforeEach(() => {
+      simulator1 = new Simulator(PUB_ID_1, PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
+      simulator1.init();
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({
           temperature: randomizer(),
           timestamp: timestampGenerator(),
         })
       );
-      simulator1 = new Simulator(PUB_ID_1, PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
-      simulator1.init();
-      simulator1.dataPointGenerator = dataGenerator;
 
+      simulator1.dataPointGenerator = dataGenerator;
+    });
+    afterEach(() => {
+      fs.rmSync(path.join("./", "private.key"), { force: true });
+    });
+    it("should send a single message", () => {
       jest.spyOn(axios, "post").mockImplementation(() => {
         return Promise.resolve({ status: 200 });
       });
@@ -227,6 +235,17 @@ describe("Simulator", () => {
       expect(axios.post).toHaveBeenCalled();
 
       expect(res).resolves.toEqual({ status: 200 });
+    });
+    it("should send messages with interval", async () => {
+      jest.spyOn(axios, "post").mockImplementation(() => {
+        return Promise.resolve({ status: 200 });
+      });
+
+      simulator1.powerOn(1);
+
+      await wait(2500);
+
+      simulator1.powerOff();
     });
   });
 });
