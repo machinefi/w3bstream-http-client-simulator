@@ -100,7 +100,7 @@ describe("Simulator", () => {
       expect(publicKey1).toEqual(publicKey2);
     });
   });
-  describe("Data Generation", () => {
+  describe("Payload generation", () => {
     beforeEach(() => {
       simulator1 = new Simulator(PUB_ID_1, PUB_TOKEN_1);
       simulator1.init();

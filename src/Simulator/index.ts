@@ -6,13 +6,27 @@ import { Message, Payload } from "../types";
 
 class NoDataPointGeneratorError extends Error {}
 
-export class Simulator {
-  private _privateKey: string = "";
-  private _dataPointGenerator: DataPointGenerator<any> | undefined;
+abstract class BaseSimulator {
+  protected _privateKey: string = "";
+  protected _dataPointGenerator: DataPointGenerator<any> | undefined;
 
   public publicKey: string = "";
 
-  constructor(private pub_id: string, private pub_token: string) {}
+  constructor(protected pub_id: string, protected pub_token: string) {}
+
+  abstract init(pathToPrivateKey?: string): void;
+
+  abstract generateSingleMessage(): Message;
+
+  set dataPointGenerator(generator: DataPointGenerator<any>) {
+    this._dataPointGenerator = generator;
+  }
+}
+
+export class Simulator extends BaseSimulator {
+  constructor(pub_id: string, pub_token: string) {
+    super(pub_id, pub_token);
+  }
 
   init(pathToPrivateKey?: string) {
     this.initFromPathOrGenerateNew(pathToPrivateKey ?? "./");
