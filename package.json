@@ -1,12 +1,18 @@
 {
-  "name": "w3bstream-http-client-simulator",
-  "version": "1.0.0",
+  "name": "@nick-iotex/w3bstream-http-client-simulator",
+  "version": "0.0.1",
   "main": "index.js",
   "author": "Nicky Ru <64008830+nicky-ru@users.noreply.github.com>",
   "license": "MIT",
   "private": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/elliptic": "^6.4.14",
