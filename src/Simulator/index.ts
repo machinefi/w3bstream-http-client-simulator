@@ -16,9 +16,9 @@ abstract class BaseSimulator {
   public publicKey: string = "";
 
   constructor(
-    protected pub_id: string,
-    protected pub_token: string,
-    protected w3bstream_endpoint: string
+    protected pubId: string,
+    protected pubToken: string,
+    protected w3bstreamEndpoint: string
   ) {}
 
   abstract init(pathToPrivateKey?: string): void;
@@ -33,8 +33,8 @@ abstract class BaseSimulator {
 }
 
 export class Simulator extends BaseSimulator {
-  constructor(pub_id: string, pub_token: string, w3bstream_endpoint: string) {
-    super(pub_id, pub_token, w3bstream_endpoint);
+  constructor(pubId: string, pubToken: string, w3bstreamEndpoint: string) {
+    super(pubId, pubToken, w3bstreamEndpoint);
   }
 
   init(pathToPrivateKey?: string) {
@@ -46,8 +46,8 @@ export class Simulator extends BaseSimulator {
 
     return {
       header: {
-        pub_id: this.pub_id,
-        pub_token: this.pub_token,
+        pub_id: this.pubId,
+        pub_token: this.pubToken,
         event_type: "DATA",
       },
       payload: payloadBase64,
@@ -58,7 +58,7 @@ export class Simulator extends BaseSimulator {
     const message = this.generateSingleMessage();
 
     try {
-      const result = await axios.post(this.w3bstream_endpoint, message);
+      const result = await axios.post(this.w3bstreamEndpoint, message);
       if (result.status !== 200) {
         throw new SendingMessageError(result.data);
       }

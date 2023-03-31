@@ -207,7 +207,7 @@ describe("Simulator", () => {
     });
   });
   describe("Sending messages", () => {
-    it("should send a message", () => {
+    it("should send a single message", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({
           temperature: randomizer(),
