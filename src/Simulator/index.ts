@@ -1,6 +1,6 @@
 import { SimulatorSigner } from "../SimulatorSigner";
 import { DataPointGenerator } from "../DataPointGenerator";
-import { IdGenerator } from "../IdGenerator";
+import { SimulatorKeys } from "../SimulatorKeys";
 import { PrivateKeyFile } from "../PrivateKeyFile";
 import { Message, Payload } from "../types";
 
@@ -43,7 +43,7 @@ export class Simulator {
   private initFromPathOrGenerateNew(pathToPk: string): void {
     try {
       const privateKey = PrivateKeyFile.getFromPath(pathToPk);
-      const publicKey = IdGenerator.derivePublicKey(privateKey);
+      const publicKey = SimulatorKeys.derivePublicKey(privateKey);
       this.updateId(privateKey, publicKey);
     } catch (err: any) {
       this.initializeNewId();
@@ -71,7 +71,7 @@ export class Simulator {
   }
 
   private initializeNewId(): void {
-    const { privateKey, publicKey } = IdGenerator.generateId();
+    const { privateKey, publicKey } = SimulatorKeys.generateId();
     this.updateId(privateKey, publicKey);
     PrivateKeyFile.save(privateKey);
   }
