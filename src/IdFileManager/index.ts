@@ -2,22 +2,29 @@ import fs from "fs";
 import path from "path";
 
 class FileNotFound extends Error {}
+class ErrorSavingFile extends Error {}
 
-export class IdFileManager {
+export class PrivateKeyFile {
   constructor() {}
 
-  static getPrivateKeyFromPath(pathToPrivateKey: string): string {
+  static getFromPath(pathToPk: string): string {
     try {
-      const privateKey = fs.readFileSync(
-        path.join(pathToPrivateKey, "private.key")
-      );
+      const filePath = path.join(pathToPk, "private.key");
+
+      const privateKey = fs.readFileSync(filePath);
       return privateKey.toString();
     } catch (err) {
-      throw new FileNotFound("File not found");
+      throw new FileNotFound();
     }
   }
 
-  static savePrivateKey(privateKey: string): void {
-    fs.writeFileSync(path.join("./", "private.key"), privateKey);
+  static save(privateKey: string): void {
+    const newPath = path.join("./", "private.key");
+
+    try {
+      fs.writeFileSync(newPath, privateKey);
+    } catch (err) {
+      throw new ErrorSavingFile();
+    }
   }
 }
