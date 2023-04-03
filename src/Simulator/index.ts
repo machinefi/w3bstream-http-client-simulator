@@ -28,6 +28,10 @@ abstract class BaseSimulator {
 
   abstract sendSingleMessage(): Promise<AxiosResponse | undefined>;
 
+  abstract powerOn(intervalInSec: number): void;
+
+  abstract powerOff(): void;
+
   set dataPointGenerator(generator: DataPointGenerator<any>) {
     this._dataPointGenerator = generator;
   }

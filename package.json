@@ -1,6 +1,6 @@
 {
   "name": "@nick-iotex/w3bstream-http-client-simulator",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "main": "index.js",
   "author": "Nicky Ru <64008830+nicky-ru@users.noreply.github.com>",
   "license": "MIT",
