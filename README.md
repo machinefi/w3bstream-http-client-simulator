@@ -15,7 +15,6 @@ This README provides an overview of the Simulator module, which is designed to g
 To use the Simulator module, you need to import it along with some dependencies:
 
 ```javascript
-import axios from "axios";
 import { Simulator } from ".";
 import { DataPointGenerator } from "../DataPointGenerator";
 import { Message, Payload } from "../types";
