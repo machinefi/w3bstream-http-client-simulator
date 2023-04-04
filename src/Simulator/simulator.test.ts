@@ -53,9 +53,6 @@ interface TemperatureDataPoint extends DataPoint {
   temperature: number;
 }
 
-const randomizer = (): number => Math.random() * 100;
-const timestampGenerator = (): number => Date.now();
-
 describe("Simulator", () => {
   describe("Initialization", () => {
     beforeEach(() => {
@@ -117,8 +114,8 @@ describe("Simulator", () => {
     it("should set a data generator", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({
-          temperature: randomizer(),
-          timestamp: timestampGenerator(),
+          temperature: DataPointGenerator.randomizer(0, 100),
+          timestamp: DataPointGenerator.timestampGenerator(),
         })
       );
       simulator1.dataPointGenerator = dataGenerator;
@@ -126,8 +123,8 @@ describe("Simulator", () => {
     it("should generate a data point", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({
-          temperature: randomizer(),
-          timestamp: timestampGenerator(),
+          temperature: DataPointGenerator.randomizer(0, 100),
+          timestamp: DataPointGenerator.timestampGenerator(),
         })
       );
       simulator1.dataPointGenerator = dataGenerator;
@@ -145,8 +142,8 @@ describe("Simulator", () => {
     it("should generate two different data points", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({
-          temperature: randomizer(),
-          timestamp: timestampGenerator(),
+          temperature: DataPointGenerator.randomizer(0, 100),
+          timestamp: DataPointGenerator.timestampGenerator(),
         })
       );
       simulator1.dataPointGenerator = dataGenerator;
@@ -165,8 +162,8 @@ describe("Simulator", () => {
     it("should generate a message with header and payload", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({
-          temperature: randomizer(),
-          timestamp: timestampGenerator(),
+          temperature: DataPointGenerator.randomizer(0, 100),
+          timestamp: DataPointGenerator.timestampGenerator(),
         })
       );
       simulator1.dataPointGenerator = dataGenerator;
@@ -180,8 +177,8 @@ describe("Simulator", () => {
     it("should generate a payload with a signature", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({
-          temperature: randomizer(),
-          timestamp: timestampGenerator(),
+          temperature: DataPointGenerator.randomizer(0, 100),
+          timestamp: DataPointGenerator.timestampGenerator(),
         })
       );
       simulator1.dataPointGenerator = dataGenerator;
@@ -195,8 +192,8 @@ describe("Simulator", () => {
     it("should sing a message with the private key", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({
-          temperature: randomizer(),
-          timestamp: timestampGenerator(),
+          temperature: DataPointGenerator.randomizer(0, 100),
+          timestamp: DataPointGenerator.timestampGenerator(),
         })
       );
       simulator1.dataPointGenerator = dataGenerator;
@@ -215,8 +212,8 @@ describe("Simulator", () => {
       simulator1.init();
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({
-          temperature: randomizer(),
-          timestamp: timestampGenerator(),
+          temperature: DataPointGenerator.randomizer(0, 100),
+          timestamp: DataPointGenerator.timestampGenerator(),
         })
       );
 
