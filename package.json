@@ -1,12 +1,13 @@
 {
   "name": "@nick-iotex/w3bstream-http-client-simulator",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "main": "index.js",
   "author": "Nicky Ru <64008830+nicky-ru@users.noreply.github.com>",
   "repository": {
     "type": "git",
     "url": "https://github.com/nicky-ru/w3bstream-http-client-simulator"
   },
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "private": false,
   "files": [
