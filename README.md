@@ -6,18 +6,19 @@ This README provides an overview of the Simulator module, which is designed to g
 
 - Getting Started
 - Usage
-  - Initialization
-  - Message Generation
-  - Sending Messages
+  - [Initialization](#initialization)
+  - [Message Generation](#message-generation)
+  - [Sending Messages](#sending-messages)
 
 ## Getting Started
 
 To use the Simulator module, you need to import it along with some dependencies:
 
 ```javascript
-import { Simulator } from ".";
-import { DataPointGenerator } from "../DataPointGenerator";
-import { Message, Payload } from "../types";
+import {
+  Simulator,
+  DataPointGenerator,
+} from "@nick-iotex/w3bstream-http-client-simulator";
 ```
 
 ## Usage
@@ -39,16 +40,31 @@ simulator.init(pathToPrivateKey);
 
 ### Message Generation
 
-To generate messages, set a `DataPointGenerator` for the simulator instance:
+Deside what the shape of the data point should be:
 
 ```javascript
-const dataGenerator =
-  new DataPointGenerator() <
-  TemperatureDataPoint >
-  (() => ({
-    temperature: randomizer(),
-    timestamp: timestampGenerator(),
-  }));
+type TemperatureDataPoint = {
+  temperature: number;
+  timestamp: number;
+};
+```
+
+And how the data point should be generated, you can use `randomizer` or `timestampGenerator` methods of DataPointGenerator: 
+
+```javascript
+const generatorFunction = () => ({
+  temperature: DataPointGenerator.randomizer(0, 100),
+  timestamp: DataPointGenerator.timestampGenerator(),
+});
+```
+
+And finally, to generate messages, instantiate data generator and set a `DataPointGenerator` for the simulator instance:
+
+```javascript
+const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
+  generatorFunction
+);
+
 simulator.dataPointGenerator = dataGenerator;
 ```
 

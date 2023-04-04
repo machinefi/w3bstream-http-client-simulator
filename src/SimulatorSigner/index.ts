@@ -1,7 +1,7 @@
 import crypto from "crypto";
-import { ec as EC } from "elliptic";
+import Elliptic from "elliptic";
 
-const ec = new EC("p256");
+const ec = new Elliptic.ec("p256");
 
 export class SimulatorSigner {
   static sign(message: string, pk: string): string {
