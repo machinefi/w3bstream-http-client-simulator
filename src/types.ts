@@ -21,7 +21,11 @@ export interface Payload {
   signature: string;
 }
 
-export interface Message {
+export interface W3bStreamEvent {
   header: Header;
   payload: string; // The Base64 encoded string representing the `Payload` object
+}
+
+export interface Message {
+  events: W3bStreamEvent[];
 }

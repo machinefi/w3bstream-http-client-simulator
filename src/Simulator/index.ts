@@ -4,7 +4,7 @@ import { SimulatorSigner } from "../SimulatorSigner";
 import { DataPointGenerator } from "../DataPointGenerator";
 import { SimulatorKeys } from "../SimulatorKeys";
 import { PrivateKeyFile } from "../PrivateKeyFile";
-import { Message, Payload } from "../types";
+import { W3bStreamEvent, Payload, Message } from "../types";
 
 class NoDataPointGeneratorError extends Error {}
 class SendingMessageError extends Error {}
@@ -26,7 +26,9 @@ abstract class BaseSimulator {
 
   abstract init(pathToPrivateKey?: string): void;
 
-  abstract generateSingleMessage(): Message;
+  abstract generateEvents(eventsNumber: number): Message;
+
+  abstract generateSingleMessage(): W3bStreamEvent;
 
   abstract sendSingleMessage(): Promise<AxiosResponse | undefined>;
 
@@ -54,8 +56,8 @@ export class Simulator extends BaseSimulator {
     this.initFromPathOrGenerateNew(pathToPrivateKey ?? "./");
   }
 
-  generateEvents(eventsNumber: number): { events: Message[] } {
-    const events: Message[] = [];
+  generateEvents(eventsNumber: number): Message {
+    const events: W3bStreamEvent[] = [];
 
     for (let i = 0; i < eventsNumber; i++) {
       events.push(this.generateSingleMessage());
@@ -64,7 +66,7 @@ export class Simulator extends BaseSimulator {
     return { events };
   }
 
-  generateSingleMessage(): Message {
+  generateSingleMessage(): W3bStreamEvent {
     const payloadBase64 = this.generateAndEncodePayload();
 
     return {
