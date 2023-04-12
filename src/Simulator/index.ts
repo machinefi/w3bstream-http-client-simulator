@@ -99,11 +99,13 @@ export class Simulator extends BaseSimulator {
     const message = this.generateEvents(1);
 
     try {
-      const result = await axios.post(this.w3bstreamEndpoint, message);
-      if (result.status !== 200) {
-        throw new SendingMessageError(result.data);
+      const res = await axios.post(this.w3bstreamEndpoint, message);
+      if (res.status < 200 || res.status >= 300) {
+        throw new SendingMessageError(
+          "Response status is not 2xx, response: " + res
+        );
       }
-      return result;
+      return res;
     } catch (e) {
       console.log(e);
     }
