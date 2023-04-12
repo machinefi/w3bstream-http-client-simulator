@@ -4,7 +4,7 @@ import { SimulatorSigner } from "../SimulatorSigner";
 import { DataPointGenerator } from "../DataPointGenerator";
 import { SimulatorKeys } from "../SimulatorKeys";
 import { PrivateKeyFile } from "../PrivateKeyFile";
-import { Message, Payload } from "../types";
+import { W3bStreamEvent, Payload, Message } from "../types";
 
 class NoDataPointGeneratorError extends Error {}
 class SendingMessageError extends Error {}
@@ -19,12 +19,16 @@ abstract class BaseSimulator {
   constructor(
     protected pubId: string,
     protected pubToken: string,
+    protected eventType: string,
+    protected eventId: string,
     protected w3bstreamEndpoint: string
   ) {}
 
   abstract init(pathToPrivateKey?: string): void;
 
-  abstract generateSingleMessage(): Message;
+  abstract generateEvents(eventsNumber: number): Message;
+
+  abstract generateSingleMessage(): W3bStreamEvent;
 
   abstract sendSingleMessage(): Promise<AxiosResponse | undefined>;
 
@@ -38,22 +42,40 @@ abstract class BaseSimulator {
 }
 
 export class Simulator extends BaseSimulator {
-  constructor(pubId: string, pubToken: string, w3bstreamEndpoint: string) {
-    super(pubId, pubToken, w3bstreamEndpoint);
+  constructor(
+    pubId: string,
+    pubToken: string,
+    eventType: string,
+    eventId: string,
+    w3bstreamEndpoint: string
+  ) {
+    super(pubId, pubToken, eventType, eventId, w3bstreamEndpoint);
   }
 
   init(pathToPrivateKey?: string) {
     this.initFromPathOrGenerateNew(pathToPrivateKey ?? "./");
   }
 
-  generateSingleMessage(): Message {
+  generateEvents(eventsNumber: number): Message {
+    const events: W3bStreamEvent[] = [];
+
+    for (let i = 0; i < eventsNumber; i++) {
+      events.push(this.generateSingleMessage());
+    }
+
+    return { events };
+  }
+
+  generateSingleMessage(): W3bStreamEvent {
     const payloadBase64 = this.generateAndEncodePayload();
 
     return {
       header: {
         pub_id: this.pubId,
-        pub_token: this.pubToken,
-        event_type: "DATA",
+        token: this.pubToken,
+        event_type: this.eventType,
+        event_id: this.eventId,
+        pub_time: Date.now(),
       },
       payload: payloadBase64,
     };
@@ -74,7 +96,7 @@ export class Simulator extends BaseSimulator {
   }
 
   async sendSingleMessage(): Promise<AxiosResponse | undefined> {
-    const message = this.generateSingleMessage();
+    const message = this.generateEvents(1);
 
     try {
       const result = await axios.post(this.w3bstreamEndpoint, message);

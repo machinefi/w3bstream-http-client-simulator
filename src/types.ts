@@ -3,12 +3,12 @@ export type Keys = {
   privateKey: string;
 };
 
-type EventType = "DATA";
-
 interface Header {
   pub_id: string;
-  pub_token: string;
-  event_type: EventType;
+  token: string;
+  event_type: string;
+  event_id: string;
+  pub_time: number;
 }
 
 export interface DataPoint {
@@ -21,7 +21,11 @@ export interface Payload {
   signature: string;
 }
 
-export interface Message {
+export interface W3bStreamEvent {
   header: Header;
   payload: string; // The Base64 encoded string representing the `Payload` object
+}
+
+export interface Message {
+  events: W3bStreamEvent[];
 }
