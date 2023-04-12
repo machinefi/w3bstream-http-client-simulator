@@ -63,6 +63,7 @@ export class Simulator extends BaseSimulator {
         token: this.pubToken,
         event_type: this.eventType,
         event_id: this.eventId,
+        pub_time: Date.now(),
       },
       payload: payloadBase64,
     };

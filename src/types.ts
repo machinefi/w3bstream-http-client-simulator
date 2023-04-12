@@ -8,6 +8,7 @@ interface Header {
   token: string;
   event_type: string;
   event_id: string;
+  pub_time: number;
 }
 
 export interface DataPoint {

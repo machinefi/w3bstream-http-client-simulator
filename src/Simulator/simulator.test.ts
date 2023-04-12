@@ -176,6 +176,7 @@ describe("Simulator", () => {
       expect(message.header.token).toEqual(PUB_TOKEN_1);
       expect(message.header.event_type).toEqual(EVENT_TYPE);
       expect(message.header.event_id).toEqual(EVENT_ID);
+      expect(message.header.pub_time).toBeDefined();
     });
     it("should generate a payload with a signature", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
