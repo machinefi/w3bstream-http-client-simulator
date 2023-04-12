@@ -39,7 +39,12 @@ abstract class BaseSimulator {
 }
 
 export class Simulator extends BaseSimulator {
-  constructor(pubId: string, pubToken: string, eventType: string, w3bstreamEndpoint: string) {
+  constructor(
+    pubId: string,
+    pubToken: string,
+    eventType: string,
+    w3bstreamEndpoint: string
+  ) {
     super(pubId, pubToken, eventType, w3bstreamEndpoint);
   }
 
