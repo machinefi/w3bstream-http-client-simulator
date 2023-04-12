@@ -19,6 +19,7 @@ abstract class BaseSimulator {
   constructor(
     protected pubId: string,
     protected pubToken: string,
+    protected eventType: string,
     protected w3bstreamEndpoint: string
   ) {}
 
@@ -38,8 +39,8 @@ abstract class BaseSimulator {
 }
 
 export class Simulator extends BaseSimulator {
-  constructor(pubId: string, pubToken: string, w3bstreamEndpoint: string) {
-    super(pubId, pubToken, w3bstreamEndpoint);
+  constructor(pubId: string, pubToken: string, eventType: string, w3bstreamEndpoint: string) {
+    super(pubId, pubToken, eventType, w3bstreamEndpoint);
   }
 
   init(pathToPrivateKey?: string) {
@@ -53,7 +54,7 @@ export class Simulator extends BaseSimulator {
       header: {
         pub_id: this.pubId,
         token: this.pubToken,
-        event_type: "DATA",
+        event_type: this.eventType,
       },
       payload: payloadBase64,
     };

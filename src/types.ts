@@ -3,12 +3,10 @@ export type Keys = {
   privateKey: string;
 };
 
-type EventType = "DATA";
-
 interface Header {
   pub_id: string;
   token: string;
-  event_type: EventType;
+  event_type: string;
 }
 
 export interface DataPoint {
