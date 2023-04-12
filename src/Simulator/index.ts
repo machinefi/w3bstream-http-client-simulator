@@ -54,6 +54,16 @@ export class Simulator extends BaseSimulator {
     this.initFromPathOrGenerateNew(pathToPrivateKey ?? "./");
   }
 
+  generateEvents(eventsNumber: number): { events: Message[] } {
+    const events: Message[] = [];
+
+    for (let i = 0; i < eventsNumber; i++) {
+      events.push(this.generateSingleMessage());
+    }
+
+    return { events };
+  }
+
   generateSingleMessage(): Message {
     const payloadBase64 = this.generateAndEncodePayload();
 
@@ -84,7 +94,7 @@ export class Simulator extends BaseSimulator {
   }
 
   async sendSingleMessage(): Promise<AxiosResponse | undefined> {
-    const message = this.generateSingleMessage();
+    const message = this.generateEvents(1);
 
     try {
       const result = await axios.post(this.w3bstreamEndpoint, message);
