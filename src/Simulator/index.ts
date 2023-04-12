@@ -20,6 +20,7 @@ abstract class BaseSimulator {
     protected pubId: string,
     protected pubToken: string,
     protected eventType: string,
+    protected eventId: string,
     protected w3bstreamEndpoint: string
   ) {}
 
@@ -43,9 +44,10 @@ export class Simulator extends BaseSimulator {
     pubId: string,
     pubToken: string,
     eventType: string,
+    eventId: string,
     w3bstreamEndpoint: string
   ) {
-    super(pubId, pubToken, eventType, w3bstreamEndpoint);
+    super(pubId, pubToken, eventType, eventId, w3bstreamEndpoint);
   }
 
   init(pathToPrivateKey?: string) {
@@ -60,6 +62,7 @@ export class Simulator extends BaseSimulator {
         pub_id: this.pubId,
         token: this.pubToken,
         event_type: this.eventType,
+        event_id: this.eventId,
       },
       payload: payloadBase64,
     };

@@ -7,6 +7,7 @@ interface Header {
   pub_id: string;
   token: string;
   event_type: string;
+  event_id: string;
 }
 
 export interface DataPoint {
