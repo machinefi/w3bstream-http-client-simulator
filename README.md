@@ -6,8 +6,8 @@ This README provides an overview of the Simulator module, which is designed to g
 
 - Getting Started
 - Usage
-  - [Initialization](#initialization)
-  - [Message Generation](#message-generation)
+  - [Message Generator](#create-message-generator)
+  - [Initialization](#simulator-initialization)
   - [Sending Messages](#sending-messages)
 
 ## Getting Started
