@@ -171,7 +171,7 @@ describe("Simulator", () => {
       const message = simulator1.generateSingleMessage();
 
       expect(message.header.pub_id).toEqual(PUB_ID_1);
-      expect(message.header.pub_token).toEqual(PUB_TOKEN_1);
+      expect(message.header.token).toEqual(PUB_TOKEN_1);
       expect(message.header.event_type).toEqual("DATA");
     });
     it("should generate a payload with a signature", () => {

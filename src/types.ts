@@ -7,7 +7,7 @@ type EventType = "DATA";
 
 interface Header {
   pub_id: string;
-  pub_token: string;
+  token: string;
   event_type: EventType;
 }
 

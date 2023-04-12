@@ -52,7 +52,7 @@ export class Simulator extends BaseSimulator {
     return {
       header: {
         pub_id: this.pubId,
-        pub_token: this.pubToken,
+        token: this.pubToken,
         event_type: "DATA",
       },
       payload: payloadBase64,
