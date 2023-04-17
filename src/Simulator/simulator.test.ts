@@ -220,7 +220,7 @@ describe("Simulator", () => {
 
       const { events } = simulator1.generateEvents(10);
       expect(events.length).toEqual(10);
-    })
+    });
     it("should generate a payload with a signature", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({
@@ -275,16 +275,15 @@ describe("Simulator", () => {
     afterEach(() => {
       fs.rmSync(path.join("./", "private.key"), { force: true });
     });
-    it("should send a single message", () => {
+    it("should send a single message", async () => {
       jest.spyOn(axios, "post").mockImplementation(() => {
         return Promise.resolve({ status: 200 });
       });
 
-      const res = simulator1.sendSingleMessage();
+      const { res } = await simulator1.sendSingleMessage();
 
       expect(axios.post).toHaveBeenCalled();
-
-      expect(res).resolves.toEqual({ status: 200 });
+      expect(res?.status).toEqual(200);
     });
     it("should send messages with interval", async () => {
       jest.spyOn(axios, "post").mockImplementation(() => {
