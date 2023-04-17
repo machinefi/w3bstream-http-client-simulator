@@ -30,7 +30,10 @@ abstract class BaseSimulator {
 
   abstract generateSingleMessage(): W3bStreamEvent;
 
-  abstract sendSingleMessage(): Promise<AxiosResponse | undefined>;
+  abstract sendSingleMessage(): Promise<{
+    res: AxiosResponse | undefined;
+    msg: Message;
+  }>;
 
   abstract powerOn(intervalInSec: number): void;
 
@@ -85,9 +88,9 @@ export class Simulator extends BaseSimulator {
     const intervalInMs = intervalInSec * 1000;
 
     this._interval = setInterval(async () => {
-      const res = await this.sendSingleMessage();
+      const { res, msg } = await this.sendSingleMessage();
       if (res) {
-        console.log("Message sent successfully, response: ", res.data);
+        this.logSuccessfulMessage(res, msg);
       } else {
         this._interval && clearInterval(this._interval);
       }
@@ -100,7 +103,10 @@ export class Simulator extends BaseSimulator {
     }
   }
 
-  async sendSingleMessage(): Promise<AxiosResponse | undefined> {
+  async sendSingleMessage(): Promise<{
+    res: AxiosResponse | undefined;
+    msg: Message;
+  }> {
     const message = this.generateEvents(1);
 
     try {
@@ -109,9 +115,10 @@ export class Simulator extends BaseSimulator {
         throw new SendingMessageError("Response status is: " + res.status);
       }
 
-      return res;
+      return { res, msg: message };
     } catch (e) {
       console.log(e);
+      return { res: undefined, msg: message };
     }
   }
 
@@ -169,5 +176,13 @@ export class Simulator extends BaseSimulator {
       throw new NoDataPointGeneratorError();
     }
     return this._dataPointGenerator.generateDataPoint();
+  }
+
+  private logSuccessfulMessage(res: AxiosResponse, msg: Message): void {
+    console.log({
+      httpResult: res.status || "",
+      w3bstreamError: res.data?.errMsg || res.data?.error || "",
+      ...msg,
+    });
   }
 }
