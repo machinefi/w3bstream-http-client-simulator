@@ -85,7 +85,12 @@ export class Simulator extends BaseSimulator {
     const intervalInMs = intervalInSec * 1000;
 
     this._interval = setInterval(async () => {
-      this.sendSingleMessage();
+      const res = await this.sendSingleMessage();
+      if (res) {
+        console.log("Message sent successfully, response: ", res.data);
+      } else {
+        this._interval && clearInterval(this._interval);
+      }
     }, intervalInMs);
   }
 
@@ -101,10 +106,9 @@ export class Simulator extends BaseSimulator {
     try {
       const res = await axios.post(this.w3bstreamEndpoint, message);
       if (res.status < 200 || res.status >= 300) {
-        throw new SendingMessageError(
-          "Response status is not 2xx, response: " + res
-        );
+        throw new SendingMessageError("Response status is: " + res.status);
       }
+
       return res;
     } catch (e) {
       console.log(e);
