@@ -101,9 +101,7 @@ export class Simulator extends BaseSimulator {
     try {
       const res = await axios.post(this.w3bstreamEndpoint, message);
       if (res.status < 200 || res.status >= 300) {
-        throw new SendingMessageError(
-          "Response status is not 2xx, response: " + res
-        );
+        throw new SendingMessageError("Response status is: " + res.status);
       }
       return res;
     } catch (e) {
