@@ -18,7 +18,7 @@ To use the Simulator module, you need to import it along with some dependencies:
 import {
   Simulator,
   DataPointGenerator,
-} from "@nick-iotex/w3bstream-http-client-simulator";
+} from "@w3bstream/w3bstream-http-client-simulator";
 ```
 
 ## Usage

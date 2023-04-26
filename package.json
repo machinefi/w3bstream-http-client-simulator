@@ -1,10 +1,10 @@
 {
-  "name": "@nick-iotex/w3bstream-http-client-simulator",
-  "version": "1.2.2",
-  "author": "Nicky Ru <64008830+nicky-ru@users.noreply.github.com>",
+  "name": "@w3bstream/w3bstream-http-client-simulator",
+  "version": "1.0.0",
+  "author": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nicky-ru/w3bstream-http-client-simulator"
+    "url": "https://github.com/machinefi/w3bstream-http-client-simulator"
   },
   "main": "dist/index.js",
   "type": "module",
