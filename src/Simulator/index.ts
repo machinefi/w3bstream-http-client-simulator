@@ -182,7 +182,8 @@ export class Simulator extends BaseSimulator {
     console.log({
       httpResult: res.status || "",
       w3bstreamError: res.data?.errMsg || res.data?.error || "",
-      ...msg,
+      header: msg.events[0].header,
+      payload: msg.events[0].payload,
     });
   }
 }
