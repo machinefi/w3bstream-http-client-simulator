@@ -184,6 +184,7 @@ export class Simulator extends BaseSimulator {
       w3bstreamError: res.data?.errMsg || res.data?.error || "",
       header: msg.events[0].header,
       payload: msg.events[0].payload,
+      devicePubKey: this.publicKey,
     });
   }
 }
