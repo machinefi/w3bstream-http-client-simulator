@@ -110,7 +110,12 @@ export class Simulator extends BaseSimulator {
     const message = this.generateEvents(1);
 
     try {
-      const res = await axios.post(this.w3bstreamEndpoint, message);
+      const res = await axios.post(this.w3bstreamEndpoint, message, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + this.pubToken,
+        },
+      });
       if (res.status < 200 || res.status >= 300) {
         throw new SendingMessageError("Response status is: " + res.status);
       }
