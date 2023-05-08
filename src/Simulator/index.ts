@@ -39,7 +39,7 @@ export class Simulator {
   }
 
   generateSingleMessage(): W3bStreamEvent {
-    const payloadBase64 = this.generateAndEncodePayload();
+    const payload = this.generatePayload();
 
     return {
       header: {
@@ -49,7 +49,7 @@ export class Simulator {
         event_id: this.eventId,
         pub_time: Date.now(),
       },
-      payload: payloadBase64,
+      payload,
     };
   }
 
@@ -124,12 +124,6 @@ export class Simulator {
     PrivateKeyFile.save(privateKey);
   }
 
-  private generateAndEncodePayload(): string {
-    const payload = this.generatePayload();
-    const payloadString = JSON.stringify(payload);
-    return Buffer.from(payloadString).toString("base64");
-  }
-
   private generatePayload(): Payload {
     const dataPoint = this.generateDataPoint();
     const signature = this.signDataPoint(dataPoint);
@@ -158,7 +152,6 @@ export class Simulator {
       w3bstreamError: res.data?.errMsg || res.data?.error || "",
       header: msg.events[0].header,
       payload: msg.events[0].payload,
-      devicePubKey: this.publicKey,
     });
   }
 }

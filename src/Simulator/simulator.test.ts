@@ -5,7 +5,7 @@ import axios from "axios";
 
 import { Simulator } from ".";
 import { DataPointGenerator } from "../DataPointGenerator";
-import { DataPoint, Payload } from "./../types";
+import { DataPoint } from "./../types";
 
 const movePkFile = (oldPath: string, newPath: string): void => {
   const newPKFile = fs.readFileSync(path.join(oldPath, "private.key"));
@@ -22,16 +22,6 @@ const removePkFile = (path: string): void => {
   if (isEmpty) {
     fs.rmdirSync(testingSimulatorPath);
   }
-};
-
-const decodePayload = (payload: string): Payload => {
-  const jsonString = Buffer.from(payload, "base64").toString();
-  return JSON.parse(jsonString);
-};
-
-const extractDataPointFromPayload = (payload: string): Partial<DataPoint> => {
-  const decodedPayload = decodePayload(payload);
-  return decodedPayload.data;
 };
 
 const wait = (ms: number): Promise<void> =>
@@ -162,9 +152,7 @@ describe("Simulator", () => {
       simulator1.dataPointGenerator = dataGenerator;
 
       const message = simulator1.generateSingleMessage();
-      const dataPoint = extractDataPointFromPayload(
-        message.payload
-      ) as TemperatureDataPoint;
+      const dataPoint = message.payload.data as TemperatureDataPoint;
 
       expect(dataPoint.temperature).toBeGreaterThanOrEqual(0);
       expect(dataPoint.temperature).toBeLessThanOrEqual(100);
@@ -181,13 +169,9 @@ describe("Simulator", () => {
       simulator1.dataPointGenerator = dataGenerator;
 
       const message1 = simulator1.generateSingleMessage();
-      const dataPoint1 = extractDataPointFromPayload(
-        message1.payload
-      ) as TemperatureDataPoint;
+      const dataPoint1 = message1.payload.data as TemperatureDataPoint;
       const message2 = simulator1.generateSingleMessage();
-      const dataPoint2 = extractDataPointFromPayload(
-        message2.payload
-      ) as TemperatureDataPoint;
+      const dataPoint2 = message2.payload.data as TemperatureDataPoint;
 
       expect(dataPoint1.temperature).not.toEqual(dataPoint2.temperature);
     });
@@ -207,7 +191,7 @@ describe("Simulator", () => {
       expect(events[0].header.event_type).toEqual(EVENT_TYPE);
       expect(events[0].header.event_id).toEqual(EVENT_ID);
       expect(events[0].header.pub_time).toBeDefined();
-      expect(events[0].payload).toBeDefined();
+      expect(events[0].payload.data.timestamp).toBeDefined();
     });
     it("should generate multiple events", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
@@ -232,9 +216,7 @@ describe("Simulator", () => {
 
       const message = simulator1.generateSingleMessage();
 
-      const payload = decodePayload(message.payload);
-
-      expect(payload.signature).toBeDefined();
+      expect(message.payload.signature).toBeDefined();
     });
     it("should sign a message with the private key", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
@@ -247,7 +229,7 @@ describe("Simulator", () => {
 
       const message = simulator1.generateSingleMessage();
 
-      const payload = decodePayload(message.payload);
+      const payload = message.payload;
 
       const signature = payload.signature;
       expect(signature.length).toBeGreaterThan(0);

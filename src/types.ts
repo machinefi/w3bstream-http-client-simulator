@@ -23,7 +23,7 @@ export interface Payload {
 
 export interface W3bStreamEvent {
   header: Header;
-  payload: string; // The Base64 encoded string representing the `Payload` object
+  payload: Payload;
 }
 
 export interface Message {
