@@ -9,51 +9,20 @@ import { W3bStreamEvent, Payload, Message } from "../types";
 class NoDataPointGeneratorError extends Error {}
 class SendingMessageError extends Error {}
 
-abstract class BaseSimulator {
-  protected _privateKey: string = "";
-  protected _dataPointGenerator: DataPointGenerator<any> | undefined;
-  protected _interval: NodeJS.Timeout | undefined;
+export class Simulator {
+  private _privateKey: string = "";
+  private _dataPointGenerator: DataPointGenerator<any> | undefined;
+  private _interval: NodeJS.Timeout | undefined;
 
   public publicKey: string = "";
 
   constructor(
-    protected pubId: string,
-    protected pubToken: string,
-    protected eventType: string,
-    protected eventId: string,
-    protected w3bstreamEndpoint: string
+    private pubId: string,
+    private pubToken: string,
+    private eventType: string,
+    private eventId: string,
+    private w3bstreamEndpoint: string
   ) {}
-
-  abstract init(pathToPrivateKey?: string): void;
-
-  abstract generateEvents(eventsNumber: number): Message;
-
-  abstract generateSingleMessage(): W3bStreamEvent;
-
-  abstract sendSingleMessage(): Promise<{
-    res: AxiosResponse | undefined;
-    msg: Message;
-  }>;
-
-  abstract powerOn(intervalInSec: number): void;
-
-  abstract powerOff(): void;
-
-  set dataPointGenerator(generator: DataPointGenerator<any>) {
-    this._dataPointGenerator = generator;
-  }
-}
-
-export class Simulator extends BaseSimulator {
-  constructor(
-    pubId: string,
-    pubToken: string,
-    eventType: string,
-    eventId: string,
-    w3bstreamEndpoint: string
-  ) {
-    super(pubId, pubToken, eventType, eventId, w3bstreamEndpoint);
-  }
 
   init(pathToPrivateKey?: string) {
     this.initFromPathOrGenerateNew(pathToPrivateKey ?? "./");
