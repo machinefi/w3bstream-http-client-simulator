@@ -4,7 +4,7 @@ import { SimulatorSigner } from "../SimulatorSigner";
 import { DataPointGenerator } from "../DataPointGenerator";
 import { SimulatorKeys } from "../SimulatorKeys";
 import { PrivateKeyFile } from "../PrivateKeyFile";
-import { W3bStreamEvent, Payload, Message } from "../types";
+import { W3bStreamEvent, Message } from "../types";
 
 class NoDataPointGeneratorError extends Error {}
 class SendingMessageError extends Error {}
@@ -17,10 +17,7 @@ export class Simulator {
   public publicKey: string = "";
 
   constructor(
-    private pubId: string,
     private pubToken: string,
-    private eventType: string,
-    private eventId: string,
     private w3bstreamEndpoint: string
   ) {}
 
@@ -39,17 +36,13 @@ export class Simulator {
   }
 
   generateSingleMessage(): W3bStreamEvent {
-    const payload = this.generatePayload();
+    const dataPoint = this.generateDataPoint();
+    const signature = this.signDataPoint(dataPoint);
 
     return {
-      header: {
-        pub_id: this.pubId,
-        token: this.pubToken,
-        event_type: this.eventType,
-        event_id: this.eventId,
-        pub_time: Date.now(),
-      },
-      payload,
+      data: dataPoint,
+      public_key: this.publicKey,
+      signature,
     };
   }
 
@@ -124,17 +117,6 @@ export class Simulator {
     PrivateKeyFile.save(privateKey);
   }
 
-  private generatePayload(): Payload {
-    const dataPoint = this.generateDataPoint();
-    const signature = this.signDataPoint(dataPoint);
-
-    return {
-      data: dataPoint,
-      public_key: this.publicKey,
-      signature,
-    };
-  }
-
   private signDataPoint(dataPoint: any): string {
     return SimulatorSigner.sign(JSON.stringify(dataPoint), this._privateKey);
   }
@@ -150,8 +132,7 @@ export class Simulator {
     console.log({
       httpResult: res.status || "",
       w3bstreamError: res.data?.errMsg || res.data?.error || "",
-      header: msg.events[0].header,
-      payload: msg.events[0].payload,
+      payload: msg.events[0],
     });
   }
 }

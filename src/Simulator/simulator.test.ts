@@ -27,12 +27,8 @@ const removePkFile = (path: string): void => {
 const wait = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-const PUB_ID_1 = "pub_id_1";
-const PUB_ID_2 = "pub_id_2";
 const PUB_TOKEN_1 = "pub_token_1";
 const PUB_TOKEN_2 = "pub_token_2";
-const EVENT_TYPE = "DEFAULT";
-const EVENT_ID = "event_id";
 const W3BSTREAM_ENDPOINT = "http://localhost:3000";
 
 let simulator1: Simulator;
@@ -48,13 +44,7 @@ interface TemperatureDataPoint extends DataPoint {
 describe("Simulator", () => {
   describe("Initialization", () => {
     beforeEach(() => {
-      simulator1 = new Simulator(
-        PUB_ID_1,
-        PUB_TOKEN_1,
-        EVENT_TYPE,
-        EVENT_ID,
-        W3BSTREAM_ENDPOINT
-      );
+      simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
       simulator1.init();
       publicKey1 = simulator1.publicKey;
     });
@@ -68,13 +58,7 @@ describe("Simulator", () => {
       const newPath = "./testing-simulator1/new-path";
       movePkFile("./", newPath);
 
-      simulator2 = new Simulator(
-        PUB_ID_2,
-        PUB_TOKEN_2,
-        EVENT_TYPE,
-        EVENT_ID,
-        W3BSTREAM_ENDPOINT
-      );
+      simulator2 = new Simulator(PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
       simulator2.init(newPath);
 
       publicKey2 = simulator2.publicKey;
@@ -87,13 +71,7 @@ describe("Simulator", () => {
       expect(publicKey1.length).toEqual(130);
     });
     it("should create new id if path to file is wrong", () => {
-      simulator2 = new Simulator(
-        PUB_ID_2,
-        PUB_TOKEN_2,
-        EVENT_TYPE,
-        EVENT_ID,
-        W3BSTREAM_ENDPOINT
-      );
+      simulator2 = new Simulator(PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
       simulator2.init("./wrong-path");
       publicKey2 = simulator2.publicKey;
 
@@ -106,13 +84,7 @@ describe("Simulator", () => {
       expect(privateKey.length).toEqual(64);
     });
     it("should reuse private.key file if one is provided", () => {
-      simulator2 = new Simulator(
-        PUB_ID_2,
-        PUB_TOKEN_2,
-        EVENT_TYPE,
-        EVENT_ID,
-        W3BSTREAM_ENDPOINT
-      );
+      simulator2 = new Simulator(PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
       simulator2.init();
       publicKey2 = simulator2.publicKey;
 
@@ -121,13 +93,7 @@ describe("Simulator", () => {
   });
   describe("Message generation", () => {
     beforeEach(() => {
-      simulator1 = new Simulator(
-        PUB_ID_1,
-        PUB_TOKEN_1,
-        EVENT_TYPE,
-        EVENT_ID,
-        W3BSTREAM_ENDPOINT
-      );
+      simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
       simulator1.init();
     });
     afterEach(() => {
@@ -152,7 +118,7 @@ describe("Simulator", () => {
       simulator1.dataPointGenerator = dataGenerator;
 
       const message = simulator1.generateSingleMessage();
-      const dataPoint = message.payload.data as TemperatureDataPoint;
+      const dataPoint = message.data as TemperatureDataPoint;
 
       expect(dataPoint.temperature).toBeGreaterThanOrEqual(0);
       expect(dataPoint.temperature).toBeLessThanOrEqual(100);
@@ -169,9 +135,9 @@ describe("Simulator", () => {
       simulator1.dataPointGenerator = dataGenerator;
 
       const message1 = simulator1.generateSingleMessage();
-      const dataPoint1 = message1.payload.data as TemperatureDataPoint;
+      const dataPoint1 = message1.data as TemperatureDataPoint;
       const message2 = simulator1.generateSingleMessage();
-      const dataPoint2 = message2.payload.data as TemperatureDataPoint;
+      const dataPoint2 = message2.data as TemperatureDataPoint;
 
       expect(dataPoint1.temperature).not.toEqual(dataPoint2.temperature);
     });
@@ -186,12 +152,7 @@ describe("Simulator", () => {
 
       const { events } = simulator1.generateEvents(1);
       expect(events.length).toEqual(1);
-      expect(events[0].header.pub_id).toEqual(PUB_ID_1);
-      expect(events[0].header.token).toEqual(PUB_TOKEN_1);
-      expect(events[0].header.event_type).toEqual(EVENT_TYPE);
-      expect(events[0].header.event_id).toEqual(EVENT_ID);
-      expect(events[0].header.pub_time).toBeDefined();
-      expect(events[0].payload.data.timestamp).toBeDefined();
+      expect(events[0].data.timestamp).toBeDefined();
     });
     it("should generate multiple events", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
@@ -216,7 +177,7 @@ describe("Simulator", () => {
 
       const message = simulator1.generateSingleMessage();
 
-      expect(message.payload.signature).toBeDefined();
+      expect(message.signature).toBeDefined();
     });
     it("should sign a message with the private key", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
@@ -229,21 +190,13 @@ describe("Simulator", () => {
 
       const message = simulator1.generateSingleMessage();
 
-      const payload = message.payload;
-
-      const signature = payload.signature;
+      const signature = message.signature;
       expect(signature.length).toBeGreaterThan(0);
     });
   });
   describe("Sending messages", () => {
     beforeEach(() => {
-      simulator1 = new Simulator(
-        PUB_ID_1,
-        PUB_TOKEN_1,
-        EVENT_TYPE,
-        EVENT_ID,
-        W3BSTREAM_ENDPOINT
-      );
+      simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
       simulator1.init();
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({
