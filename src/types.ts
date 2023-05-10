@@ -7,12 +7,8 @@ export interface DataPoint {
   timestamp: number;
 }
 
-export interface W3bStreamEvent {
+export interface W3bStreamMessage {
   data: DataPoint;
   public_key: string;
   signature: string;
-}
-
-export interface Message {
-  events: W3bStreamEvent[];
 }

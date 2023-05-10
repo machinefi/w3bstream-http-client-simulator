@@ -141,31 +141,6 @@ describe("Simulator", () => {
 
       expect(dataPoint1.temperature).not.toEqual(dataPoint2.temperature);
     });
-    it("should generate one event with header and payload", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
-      simulator1.dataPointGenerator = dataGenerator;
-
-      const { events } = simulator1.generateEvents(1);
-      expect(events.length).toEqual(1);
-      expect(events[0].data.timestamp).toBeDefined();
-    });
-    it("should generate multiple events", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
-      simulator1.dataPointGenerator = dataGenerator;
-
-      const { events } = simulator1.generateEvents(10);
-      expect(events.length).toEqual(10);
-    });
     it("should generate a payload with a signature", () => {
       const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
         () => ({

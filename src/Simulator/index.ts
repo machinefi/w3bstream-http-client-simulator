@@ -4,7 +4,7 @@ import { SimulatorSigner } from "../SimulatorSigner";
 import { DataPointGenerator } from "../DataPointGenerator";
 import { SimulatorKeys } from "../SimulatorKeys";
 import { PrivateKeyFile } from "../PrivateKeyFile";
-import { W3bStreamEvent, Message } from "../types";
+import { W3bStreamMessage } from "../types";
 
 class NoDataPointGeneratorError extends Error {}
 class SendingMessageError extends Error {}
@@ -16,26 +16,13 @@ export class Simulator {
 
   public publicKey: string = "";
 
-  constructor(
-    private pubToken: string,
-    private w3bstreamEndpoint: string
-  ) {}
+  constructor(private pubToken: string, private w3bstreamEndpoint: string) {}
 
   init(pathToPrivateKey?: string) {
     this.initFromPathOrGenerateNew(pathToPrivateKey ?? "./");
   }
 
-  generateEvents(eventsNumber: number): Message {
-    const events: W3bStreamEvent[] = [];
-
-    for (let i = 0; i < eventsNumber; i++) {
-      events.push(this.generateSingleMessage());
-    }
-
-    return { events };
-  }
-
-  generateSingleMessage(): W3bStreamEvent {
+  generateSingleMessage(): W3bStreamMessage {
     const dataPoint = this.generateDataPoint();
     const signature = this.signDataPoint(dataPoint);
 
@@ -67,9 +54,9 @@ export class Simulator {
 
   async sendSingleMessage(): Promise<{
     res: AxiosResponse | undefined;
-    msg: Message;
+    msg: W3bStreamMessage;
   }> {
-    const message = this.generateEvents(1);
+    const message = this.generateSingleMessage();
 
     try {
       const res = await axios.post(this.w3bstreamEndpoint, message, {
@@ -128,11 +115,14 @@ export class Simulator {
     return this._dataPointGenerator.generateDataPoint();
   }
 
-  private logSuccessfulMessage(res: AxiosResponse, msg: Message): void {
+  private logSuccessfulMessage(
+    res: AxiosResponse,
+    msg: W3bStreamMessage
+  ): void {
     console.log({
       httpResult: res.status || "",
       w3bstreamError: res.data?.errMsg || res.data?.error || "",
-      payload: msg.events[0],
+      payload: msg,
     });
   }
 }
