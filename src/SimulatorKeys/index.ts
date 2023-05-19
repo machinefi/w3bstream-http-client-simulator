@@ -1,4 +1,6 @@
 import crypto from "crypto";
+import { Keccak } from "sha3";
+
 import { Keys } from "src/types";
 
 const curveName = "prime256v1";
@@ -20,5 +22,12 @@ export class SimulatorKeys {
     ecdh.setPrivateKey(privateKey, "hex");
 
     return ecdh.getPublicKey("hex");
+  }
+  
+  static hashPublicKey(publicKey: string): string {
+    const hash = new Keccak(256);
+
+    hash.update(publicKey);
+    return hash.digest("hex");
   }
 }
