@@ -29,6 +29,7 @@ export class Simulator {
     return {
       data: dataPoint,
       public_key: this.publicKey,
+      deviceId: "0x" + SimulatorKeys.hashPublicKey(this.publicKey),
       signature,
     };
   }
@@ -119,12 +120,10 @@ export class Simulator {
     res: AxiosResponse,
     msg: W3bStreamMessage
   ): void {
-    const deviceId = SimulatorKeys.hashPublicKey(msg.public_key);
     console.log({
       httpResult: res.status || "",
       w3bstreamError: res.data?.errMsg || res.data?.error || "",
       payload: msg,
-      deviceId: `0x${deviceId}`,
     });
   }
 }

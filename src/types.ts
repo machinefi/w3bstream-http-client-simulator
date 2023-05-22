@@ -9,6 +9,7 @@ export interface DataPoint {
 
 export interface W3bStreamMessage {
   data: DataPoint;
+  deviceId: string;
   public_key: string;
   signature: string;
 }
