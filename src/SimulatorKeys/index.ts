@@ -23,7 +23,7 @@ export class SimulatorKeys {
 
     return ecdh.getPublicKey("hex");
   }
-  
+
   static hashPublicKey(publicKey: string): string {
     const hash = new Keccak(256);
 
