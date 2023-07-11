@@ -21,6 +21,13 @@ import {
 } from "@w3bstream/w3bstream-http-client-simulator";
 ```
 
+And provide DEVICE_TOKEN and HTTP_ROUTE that can be found in W3bstream project.
+
+```javascript
+const deviceToken = "DEVICE_TOKEN";
+const httpRoute = "HTTP_ROUTE";
+```
+
 ## Usage
 
 ### Create message generator
@@ -56,7 +63,7 @@ const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
 Create a new instance of the `Simulator` class, initialize it and set a `DataPointGenerator` that you created earlier:
 
 ```javascript
-const simulator = new Simulator(pubId, pubToken, w3bstreamEndpoint);
+const simulator = new Simulator(deviceToken, httpRoute);
 simulator.init();
 simulator.dataPointGenerator = dataGenerator;
 ```
@@ -78,7 +85,10 @@ const message = simulator.generateEvents(numberOfDataPoints);
 To send a single message to the server, call the `sendSingleMessage` method:
 
 ```javascript
-const res = simulator.sendSingleMessage();
+const { res, msg } = await simulator.sendSingleMessage();
+
+console.log("response: ", res?.data);
+console.log("w3bstream message: ", msg);
 ```
 
 To send messages at a specified interval, use the `powerOn` method:
