@@ -1,4 +1,4 @@
-import { SimulatorSigner } from "./";
+import { SimulatorSigner } from ".";
 
 const PRIVATE_KEY_EXAMPLE =
   "1a9cd7dd19de448df9b85d93c4758558aa1d2f0b350e7788104951129d91c966";

@@ -1,9 +1,9 @@
 import axios, { AxiosResponse } from "axios";
 
-import { SimulatorSigner } from "../SimulatorSigner";
-import { DataPointGenerator } from "../DataPointGenerator";
-import { SimulatorKeys } from "../SimulatorKeys";
-import { PrivateKeyFile } from "../PrivateKeyFile";
+import { SimulatorSigner } from "../SimulatorSigner/index.js";
+import { DataPointGenerator } from "../DataPointGenerator/index.js";
+import { SimulatorKeys } from "../SimulatorKeys/index.js";
+import { PrivateKeyFile } from "../PrivateKeyFile/index.js";
 import { W3bStreamMessage } from "../types";
 
 class NoDataPointGeneratorError extends Error {}
@@ -16,7 +16,7 @@ export class Simulator {
 
   public publicKey: string = "";
 
-  constructor(private pubToken: string, private w3bstreamEndpoint: string) {}
+  constructor(private _deviceToken: string, private _httpRoute: string) {}
 
   init(pathToPrivateKey?: string) {
     this.initFromPathOrGenerateNew(pathToPrivateKey ?? "./");
@@ -60,10 +60,10 @@ export class Simulator {
     const message = this.generateSingleMessage();
 
     try {
-      const res = await axios.post(this.w3bstreamEndpoint, message, {
+      const res = await axios.post(this._httpRoute, message, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + this.pubToken,
+          Authorization: "Bearer " + this._deviceToken,
         },
       });
       if (res.status < 200 || res.status >= 300) {
