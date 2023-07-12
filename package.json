@@ -36,5 +36,8 @@
   "keywords": [
     "w3bstream",
     "iotex"
-  ]
+  ],
+  "dependencies": {
+    "w3bstream-client-js": "^1.0.3"
+  }
 }
