@@ -1,4 +1,5 @@
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
+import { W3bstreamClient, WSHeader } from "w3bstream-client-js";
 
 import { SimulatorSigner } from "../SimulatorSigner/index.js";
 import { DataPointGenerator } from "../DataPointGenerator/index.js";
@@ -10,13 +11,16 @@ class NoDataPointGeneratorError extends Error {}
 class SendingMessageError extends Error {}
 
 export class Simulator {
+  private _client: W3bstreamClient | undefined;
   private _privateKey: string = "";
   private _dataPointGenerator: DataPointGenerator<any> | undefined;
   private _interval: NodeJS.Timeout | undefined;
 
   public publicKey: string = "";
 
-  constructor(private _deviceToken: string, private _httpRoute: string) {}
+  constructor(_deviceToken: string, _httpRoute: string) {
+    this._client = new W3bstreamClient(_httpRoute, _deviceToken);
+  }
 
   init(pathToPrivateKey?: string) {
     this.initFromPathOrGenerateNew(pathToPrivateKey ?? "./");
@@ -60,19 +64,18 @@ export class Simulator {
     const message = this.generateSingleMessage();
 
     try {
-      const res = await axios.post(this._httpRoute, message, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + this._deviceToken,
-        },
-      });
-      if (res.status < 200 || res.status >= 300) {
+      const header: WSHeader = {
+        deviceId: message.deviceId,
+      };
+      const res = await this._client?.publish(header, message);
+      if (res?.status && (res.status < 200 || res.status >= 300)) {
         throw new SendingMessageError("Response status is: " + res.status);
       }
 
       return { res, msg: message };
     } catch (e) {
       console.log(e);
+      console.log()
       return { res: undefined, msg: message };
     }
   }

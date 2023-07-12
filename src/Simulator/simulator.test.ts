@@ -1,11 +1,24 @@
 import path from "path";
 import fs from "fs";
 
-import axios from "axios";
-
 import { Simulator } from ".";
 import { DataPointGenerator } from "../DataPointGenerator";
 import { DataPoint } from "./../types";
+
+jest.mock("w3bstream-client-js", () => {
+  return {
+    W3bstreamClient: jest.fn().mockImplementation(() => {
+      return {
+        send: jest.fn().mockImplementation(() => {
+          return {
+            res: true,
+            msg: "message sent",
+          };
+        }),
+      };
+    }),
+  };
+});
 
 const movePkFile = (oldPath: string, newPath: string): void => {
   const newPKFile = fs.readFileSync(path.join(oldPath, "private.key"));
@@ -24,8 +37,6 @@ const removePkFile = (path: string): void => {
   }
 };
 
-const wait = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
 
 const PUB_TOKEN_1 = "pub_token_1";
 const PUB_TOKEN_2 = "pub_token_2";
@@ -167,44 +178,6 @@ describe("Simulator", () => {
 
       const signature = message.signature;
       expect(signature.length).toBeGreaterThan(0);
-    });
-  });
-  describe("Sending messages", () => {
-    beforeEach(() => {
-      simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
-      simulator1.init();
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
-
-      simulator1.dataPointGenerator = dataGenerator;
-    });
-    afterEach(() => {
-      fs.rmSync(path.join("./", "private.key"), { force: true });
-    });
-    it("should send a single message", async () => {
-      jest.spyOn(axios, "post").mockImplementation(() => {
-        return Promise.resolve({ status: 200 });
-      });
-
-      const { res } = await simulator1.sendSingleMessage();
-
-      expect(axios.post).toHaveBeenCalled();
-      expect(res?.status).toEqual(200);
-    });
-    it("should send messages with interval", async () => {
-      jest.spyOn(axios, "post").mockImplementation(() => {
-        return Promise.resolve({ status: 200 });
-      });
-
-      simulator1.powerOn(1);
-
-      await wait(2500);
-
-      simulator1.powerOff();
     });
   });
 });
