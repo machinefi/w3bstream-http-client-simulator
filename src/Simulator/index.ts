@@ -8,7 +8,7 @@ import { PrivateKeyFile } from "../PrivateKeyFile/index.js";
 import { W3bStreamMessage } from "../types";
 
 export class NoDataPointGeneratorError extends Error {}
-class SendingMessageError extends Error {}
+export class SendingMessageError extends Error {}
 
 export class Simulator {
   private _client: W3bstreamClient | undefined;
@@ -42,9 +42,11 @@ export class Simulator {
     const intervalInMs = intervalInSec * 1000;
 
     this._interval = setInterval(async () => {
-      const { res } = await this.sendSingleMessage();
-      if (!res) {
-        this._interval && clearInterval(this._interval);
+      try {
+        await this.sendSingleMessage();
+      } catch (e) {
+        this.powerOff();
+        throw e;
       }
     }, intervalInMs);
   }
@@ -61,22 +63,22 @@ export class Simulator {
   }> {
     const message = this.generateSingleMessage();
 
-    try {
-      const header: WSHeader = {
-        deviceId: message.deviceId,
-      };
-      const res = await this._client?.publish(header, message);
-      if (res?.status && (res.status < 200 || res.status >= 300)) {
-        throw new SendingMessageError("Response status is: " + res.status);
-      }
+    const header: WSHeader = {
+      deviceId: message.deviceId,
+    };
+    const res = await this._client?.publish(header, message);
 
-      this.logSuccessfulMessage(res, message);
-
-      return { res, msg: message };
-    } catch (e) {
-      console.log(e);
-      return { res: undefined, msg: message };
+    if (!res) {
+      throw new SendingMessageError("No response");
     }
+
+    if (res?.status && (res.status < 200 || res.status >= 300)) {
+      throw new SendingMessageError("Response status is: " + res.status);
+    }
+
+    this.logSuccessfulMessage(res, message);
+
+    return { res, msg: message };
   }
 
   set dataPointGenerator(generator: DataPointGenerator<any>) {

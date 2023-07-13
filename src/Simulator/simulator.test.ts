@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import { AxiosResponse } from "axios";
 
 import { Simulator, NoDataPointGeneratorError } from ".";
 import { DataPointGenerator } from "../DataPointGenerator";
@@ -9,10 +10,11 @@ jest.mock("w3bstream-client-js", () => {
   return {
     W3bstreamClient: jest.fn().mockImplementation(() => {
       return {
-        send: jest.fn().mockImplementation(() => {
+        publish: jest.fn().mockImplementation((): Partial<AxiosResponse> => {
           return {
-            res: true,
-            msg: "message sent",
+            status: 200,
+            statusText: "OK",
+            data: {},
           };
         }),
       };
@@ -148,6 +150,37 @@ describe("simulator", () => {
       expect(() => simulator2.generateSingleMessage()).toThrow(
         NoDataPointGeneratorError
       );
+    });
+  });
+
+  describe("simulation", () => {
+    let dataGenerator: DataPointGenerator<TemperatureDataPoint>;
+
+    beforeEach(() => {
+      simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
+      simulator1.init();
+
+      dataGenerator = new DataPointGenerator<TemperatureDataPoint>(() => ({
+        temperature: DataPointGenerator.randomizer(0, 100),
+        timestamp: DataPointGenerator.timestampGenerator(),
+      }));
+
+      simulator1.dataPointGenerator = dataGenerator;
+    });
+    it("should power on", async () => {
+      simulator1.powerOn(1);
+
+      jest.spyOn(simulator1, "sendSingleMessage");
+
+      await new Promise((resolve) => setTimeout(resolve, 1_000));
+
+      expect(simulator1.sendSingleMessage).toHaveBeenCalledTimes(1);
+
+      await new Promise((resolve) => setTimeout(resolve, 1_000));
+
+      expect(simulator1.sendSingleMessage).toHaveBeenCalledTimes(2);
+
+      simulator1.powerOff();
     });
   });
 });
