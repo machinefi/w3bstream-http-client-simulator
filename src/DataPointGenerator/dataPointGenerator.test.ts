@@ -10,20 +10,25 @@ describe("DataPointGenerator", () => {
       timestamp: number;
       power: number;
     };
-    const timestampGenerator = () => Date.now();
-    const powerGenerator = () => Math.random();
 
     const dataPointGeneratorFunction = () => ({
-      timestamp: timestampGenerator(),
-      power: powerGenerator(),
+      timestamp: DataPointGenerator.timestampGenerator(),
+      power: DataPointGenerator.randomizer(0, 100),
     });
 
     const dataPointGenerator = new DataPointGenerator<DataPoint>(
       dataPointGeneratorFunction
     );
 
-    const dataPoint = dataPointGenerator.generateDataPoint();
-    expect(dataPoint).toHaveProperty("timestamp");
-    expect(dataPoint).toHaveProperty("power");
+    const dataPoint1 = dataPointGenerator.generateDataPoint();
+
+    expect(dataPoint1).toHaveProperty("timestamp");
+    expect(dataPoint1).toHaveProperty("power");
+
+    const dataPoint2 = dataPointGenerator.generateDataPoint();
+
+    expect(dataPoint1.power).not.toBe(dataPoint2.power);
+
+    console.log(dataPoint1, dataPoint2)
   });
 });
