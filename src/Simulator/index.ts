@@ -7,7 +7,7 @@ import { SimulatorKeys } from "../SimulatorKeys/index.js";
 import { PrivateKeyFile } from "../PrivateKeyFile/index.js";
 import { W3bStreamMessage } from "../types";
 
-class NoDataPointGeneratorError extends Error {}
+export class NoDataPointGeneratorError extends Error {}
 class SendingMessageError extends Error {}
 
 export class Simulator {
@@ -42,10 +42,8 @@ export class Simulator {
     const intervalInMs = intervalInSec * 1000;
 
     this._interval = setInterval(async () => {
-      const { res, msg } = await this.sendSingleMessage();
-      if (res) {
-        this.logSuccessfulMessage(res, msg);
-      } else {
+      const { res } = await this.sendSingleMessage();
+      if (!res) {
         this._interval && clearInterval(this._interval);
       }
     }, intervalInMs);
@@ -72,10 +70,11 @@ export class Simulator {
         throw new SendingMessageError("Response status is: " + res.status);
       }
 
+      this.logSuccessfulMessage(res, message);
+
       return { res, msg: message };
     } catch (e) {
       console.log(e);
-      console.log()
       return { res: undefined, msg: message };
     }
   }
@@ -120,12 +119,12 @@ export class Simulator {
   }
 
   private logSuccessfulMessage(
-    res: AxiosResponse,
+    res: AxiosResponse | undefined,
     msg: W3bStreamMessage
   ): void {
     console.log({
-      httpResult: res.status || "",
-      w3bstreamError: res.data?.errMsg || res.data?.error || "",
+      httpResult: res?.status || "",
+      w3bstreamError: res?.data?.errMsg || res?.data?.error || "",
       payload: msg,
     });
   }

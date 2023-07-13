@@ -1,9 +1,9 @@
 import path from "path";
 import fs from "fs";
 
-import { Simulator } from ".";
+import { Simulator, NoDataPointGeneratorError } from ".";
 import { DataPointGenerator } from "../DataPointGenerator";
-import { DataPoint } from "./../types";
+import { DataPoint, W3bStreamMessage } from "./../types";
 
 jest.mock("w3bstream-client-js", () => {
   return {
@@ -103,6 +103,8 @@ describe("simulator", () => {
   });
   describe("Message generation", () => {
     let dataGenerator: DataPointGenerator<TemperatureDataPoint>;
+    let message1: W3bStreamMessage;
+
     beforeEach(() => {
       simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
       simulator1.init();
@@ -111,48 +113,41 @@ describe("simulator", () => {
         temperature: DataPointGenerator.randomizer(0, 100),
         timestamp: DataPointGenerator.timestampGenerator(),
       }));
+
+      simulator1.dataPointGenerator = dataGenerator;
+
+      message1 = simulator1.generateSingleMessage();
     });
     afterEach(() => {
       fs.rmSync(path.join("./", "private.key"), { force: true });
     });
-    it("should set a data generator", () => {
-      simulator1.dataPointGenerator = dataGenerator;
-    });
     it("should generate a data point", () => {
-      simulator1.dataPointGenerator = dataGenerator;
-
-      const message = simulator1.generateSingleMessage();
-      const dataPoint = message.data as TemperatureDataPoint;
+      const dataPoint = message1.data as TemperatureDataPoint;
 
       expect(dataPoint.temperature).toBeGreaterThanOrEqual(0);
       expect(dataPoint.temperature).toBeLessThanOrEqual(100);
 
-      expect(dataPoint.timestamp).toBeGreaterThanOrEqual(0);
+      expect(dataPoint.timestamp).toBeGreaterThan(Date.now() - 1000);
     });
     it("should generate two different data points", () => {
-      simulator1.dataPointGenerator = dataGenerator;
-
-      const message1 = simulator1.generateSingleMessage();
-      const dataPoint1 = message1.data as TemperatureDataPoint;
       const message2 = simulator1.generateSingleMessage();
+
+      const dataPoint1 = message1.data as TemperatureDataPoint;
       const dataPoint2 = message2.data as TemperatureDataPoint;
 
+      expect(dataPoint1.temperature).toBeDefined();
+      expect(dataPoint2.temperature).toBeDefined();
       expect(dataPoint1.temperature).not.toEqual(dataPoint2.temperature);
     });
     it("should generate a payload with a signature", () => {
-      simulator1.dataPointGenerator = dataGenerator;
-
-      const message = simulator1.generateSingleMessage();
-
-      expect(message.signature).toBeDefined();
+      expect(message1.signature.length).toBeGreaterThan(0);
     });
-    it("should sign a message with the private key", () => {
-      simulator1.dataPointGenerator = dataGenerator;
-
-      const message = simulator1.generateSingleMessage();
-
-      const signature = message.signature;
-      expect(signature.length).toBeGreaterThan(0);
+    it("should throw if no data generator is set", () => {
+      const simulator2 = new Simulator(PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
+      simulator2.init();
+      expect(() => simulator2.generateSingleMessage()).toThrow(
+        NoDataPointGeneratorError
+      );
     });
   });
 });
