@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
 
-class FileNotFound extends Error {}
-class ErrorSavingFile extends Error {}
+export class FileNotFound extends Error {}
+export class ErrorSavingFile extends Error {}
 
 export class PrivateKeyFile {
   constructor() {}
