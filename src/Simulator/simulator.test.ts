@@ -37,7 +37,6 @@ const removePkFile = (path: string): void => {
   }
 };
 
-
 const PUB_TOKEN_1 = "pub_token_1";
 const PUB_TOKEN_2 = "pub_token_2";
 const W3BSTREAM_ENDPOINT = "http://localhost:3000";
@@ -52,8 +51,8 @@ interface TemperatureDataPoint extends DataPoint {
   temperature: number;
 }
 
-describe("Simulator", () => {
-  describe("Initialization", () => {
+describe("simulator", () => {
+  describe("initialize", () => {
     beforeEach(() => {
       simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
       simulator1.init();
@@ -103,29 +102,23 @@ describe("Simulator", () => {
     });
   });
   describe("Message generation", () => {
+    let dataGenerator: DataPointGenerator<TemperatureDataPoint>;
     beforeEach(() => {
       simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
       simulator1.init();
+
+      dataGenerator = new DataPointGenerator<TemperatureDataPoint>(() => ({
+        temperature: DataPointGenerator.randomizer(0, 100),
+        timestamp: DataPointGenerator.timestampGenerator(),
+      }));
     });
     afterEach(() => {
       fs.rmSync(path.join("./", "private.key"), { force: true });
     });
     it("should set a data generator", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
       simulator1.dataPointGenerator = dataGenerator;
     });
     it("should generate a data point", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
       simulator1.dataPointGenerator = dataGenerator;
 
       const message = simulator1.generateSingleMessage();
@@ -137,12 +130,6 @@ describe("Simulator", () => {
       expect(dataPoint.timestamp).toBeGreaterThanOrEqual(0);
     });
     it("should generate two different data points", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
       simulator1.dataPointGenerator = dataGenerator;
 
       const message1 = simulator1.generateSingleMessage();
@@ -153,12 +140,6 @@ describe("Simulator", () => {
       expect(dataPoint1.temperature).not.toEqual(dataPoint2.temperature);
     });
     it("should generate a payload with a signature", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
       simulator1.dataPointGenerator = dataGenerator;
 
       const message = simulator1.generateSingleMessage();
@@ -166,12 +147,6 @@ describe("Simulator", () => {
       expect(message.signature).toBeDefined();
     });
     it("should sign a message with the private key", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
       simulator1.dataPointGenerator = dataGenerator;
 
       const message = simulator1.generateSingleMessage();
