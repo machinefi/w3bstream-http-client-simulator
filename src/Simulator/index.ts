@@ -18,8 +18,8 @@ export class Simulator {
 
   public publicKey: string = "";
 
-  constructor(deviceToken: string, httpRoute: string) {
-    this._client = new W3bstreamClient(httpRoute, deviceToken);
+  constructor(apiKey: string, httpRoute: string) {
+    this._client = new W3bstreamClient(httpRoute, apiKey);
   }
 
   init(pathToPrivateKey?: string) {

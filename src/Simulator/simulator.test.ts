@@ -24,8 +24,7 @@ jest.mock("w3bstream-client-js", () => {
   };
 });
 
-const PUB_TOKEN_1 = "pub_token_1";
-const PUB_TOKEN_2 = "pub_token_2";
+const API_KEY = "api_key";
 const W3BSTREAM_ENDPOINT = "http://localhost:3000";
 
 describe("simulator", () => {
@@ -37,7 +36,7 @@ describe("simulator", () => {
     let publicKey2: string;
 
     beforeEach(() => {
-      simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
+      simulator1 = new Simulator(API_KEY, W3BSTREAM_ENDPOINT);
       simulator1.init();
       publicKey1 = simulator1.publicKey;
     });
@@ -51,7 +50,7 @@ describe("simulator", () => {
       const newPath = "./testing-simulator1/new-path";
       movePkFile("./", newPath);
 
-      simulator2 = new Simulator(PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
+      simulator2 = new Simulator(API_KEY, W3BSTREAM_ENDPOINT);
       simulator2.init(newPath);
 
       publicKey2 = simulator2.publicKey;
@@ -64,7 +63,7 @@ describe("simulator", () => {
       expect(publicKey1.length).toEqual(130);
     });
     it("should create new id if path to file is wrong", () => {
-      simulator2 = new Simulator(PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
+      simulator2 = new Simulator(API_KEY, W3BSTREAM_ENDPOINT);
       simulator2.init("./wrong-path");
       publicKey2 = simulator2.publicKey;
 
@@ -77,7 +76,7 @@ describe("simulator", () => {
       expect(privateKey.length).toEqual(64);
     });
     it("should reuse private.key file if one is provided", () => {
-      simulator2 = new Simulator(PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
+      simulator2 = new Simulator(API_KEY, W3BSTREAM_ENDPOINT);
       simulator2.init();
 
       expect(publicKey1).toEqual(simulator2.publicKey);
@@ -93,7 +92,7 @@ describe("simulator", () => {
     let message1: W3bStreamMessage;
 
     beforeEach(() => {
-      simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
+      simulator1 = new Simulator(API_KEY, W3BSTREAM_ENDPOINT);
       simulator1.init();
 
       dataGenerator = new DataPointGenerator<TemperatureDataPoint>(() => ({
@@ -130,7 +129,7 @@ describe("simulator", () => {
       expect(message1.signature.length).toBeGreaterThan(0);
     });
     it("should throw if no data generator is set", () => {
-      const simulator2 = new Simulator(PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
+      const simulator2 = new Simulator(API_KEY, W3BSTREAM_ENDPOINT);
       simulator2.init();
       expect(() => simulator2.generateSingleMessage()).toThrow(
         NoDataPointGeneratorError
@@ -148,7 +147,7 @@ describe("simulator", () => {
     let mockSendMsg: jest.SpyInstance;
 
     beforeEach(() => {
-      simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
+      simulator1 = new Simulator(API_KEY, W3BSTREAM_ENDPOINT);
       simulator1.init();
 
       dataGenerator = new DataPointGenerator<TemperatureDataPoint>(() => ({

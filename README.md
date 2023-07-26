@@ -26,7 +26,7 @@ import {
 And provide DEVICE_TOKEN and HTTP_ROUTE that can be found in W3bstream project.
 
 ```ts
-const api_key = "API_KEY";
+const apiKey = "API_KEY";
 const httpRoute = "HTTP_ROUTE";
 ```
 
@@ -65,7 +65,7 @@ const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
 Create a new instance of the `Simulator` class, initialize it and set a `DataPointGenerator` that you created earlier:
 
 ```ts
-const simulator = new Simulator(deviceToken, httpRoute);
+const simulator = new Simulator(apiKey, httpRoute);
 simulator.init();
 simulator.dataPointGenerator = dataGenerator;
 ```
