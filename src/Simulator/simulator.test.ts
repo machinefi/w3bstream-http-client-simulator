@@ -136,7 +136,6 @@ describe("simulator", () => {
       );
     });
   });
-
   describe("simulation", () => {
     interface TemperatureDataPoint extends DataPoint {
       temperature: number;
@@ -161,6 +160,10 @@ describe("simulator", () => {
     });
     afterEach(() => {
       mockSendMsg.mockRestore();
+      fs.rmSync(path.join("./", "private.key"), { force: true });
+    });
+    it("should send a message to a custom event", async () => {
+      await simulator1.sendSingleMessage("TEMPERATURE_EVENT");
     });
     it("should power on", async () => {
       jest.useFakeTimers();
@@ -181,6 +184,21 @@ describe("simulator", () => {
 
       jest.useRealTimers();
     });
+    it("should power on with a custom event", async () => {
+      jest.useFakeTimers();
+
+      const eventType = "TEMPERATURE_EVENT";
+      simulator1.powerOn(1, eventType);
+      jest.spyOn(simulator1, "sendSingleMessage");
+
+      await jest.advanceTimersByTimeAsync(1_000);
+
+      expect(simulator1.sendSingleMessage).toHaveBeenCalledTimes(1);
+      expect(simulator1.sendSingleMessage).toHaveBeenCalledWith(eventType);
+
+      simulator1.powerOff();
+      jest.useRealTimers();
+    });
     it("should power off if msg sending fails", async () => {
       jest.useFakeTimers();
 
@@ -196,7 +214,6 @@ describe("simulator", () => {
 
       jest.useRealTimers();
     });
-
   });
 });
 
