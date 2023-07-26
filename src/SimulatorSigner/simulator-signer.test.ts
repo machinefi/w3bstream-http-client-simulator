@@ -18,7 +18,7 @@ describe("simulator signer", () => {
   beforeEach(() => {
     signature = SimulatorSigner.sign(messageTest, PRIVATE_KEY_EXAMPLE);
   });
-  it("should sign a message", () => {
+  it("should produce a correct signature", () => {
     expect(signature).toEqual(SIGNATURE_EXAMPLE);
   });
   it("should verify a message", () => {

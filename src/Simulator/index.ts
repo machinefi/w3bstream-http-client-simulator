@@ -45,8 +45,10 @@ export class Simulator {
       try {
         await this.sendSingleMessage();
       } catch (e) {
+        console.log(e);
+        console.log("Stopping simulator due to error");
+
         this.powerOff();
-        throw e;
       }
     }, intervalInMs);
   }
@@ -54,6 +56,8 @@ export class Simulator {
   powerOff(): void {
     if (this._interval) {
       clearInterval(this._interval);
+
+      delete this._interval;
     }
   }
 
@@ -64,9 +68,9 @@ export class Simulator {
     const message = this.generateSingleMessage();
 
     const header: WSHeader = {
-      deviceId: message.deviceId,
+      device_id: message.deviceId,
     };
-    const res = await this._client?.publish(header, message);
+    const res = await this._client?.publishDirect(header, message);
 
     if (!res) {
       throw new SendingMessageError("No response");

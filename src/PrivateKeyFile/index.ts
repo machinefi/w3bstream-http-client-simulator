@@ -5,8 +5,6 @@ export class FileNotFound extends Error {}
 export class ErrorSavingFile extends Error {}
 
 export class PrivateKeyFile {
-  constructor() {}
-
   static getFromPath(pathToPk: string): string {
     try {
       const filePath = path.join(pathToPk, "private.key");

@@ -7,8 +7,6 @@ const curveName = "prime256v1";
 const ecdh = crypto.createECDH(curveName);
 
 export class SimulatorKeys {
-  constructor() {}
-
   static generateKeys(): Keys {
     ecdh.generateKeys();
 
