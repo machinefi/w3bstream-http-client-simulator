@@ -87,7 +87,9 @@ const message = simulator.generateEvents(numberOfDataPoints);
 To send a single message to the server, call the `sendSingleMessage` method:
 
 ```ts
-const { res, msg } = await simulator.sendSingleMessage();
+const eventType = "TEMPERATURE";
+
+const { res, msg } = await simulator.sendSingleMessage(eventType);
 
 console.log("response: ", res?.data);
 console.log("w3bstream message: ", msg);
@@ -96,7 +98,10 @@ console.log("w3bstream message: ", msg);
 To send messages at a specified interval, use the `powerOn` method:
 
 ```ts
-simulator.powerOn(intervalInSec);
+const intervalInSec = 1;
+const eventType = "TEMPERATURE";
+
+simulator.powerOn(intervalInSec, eventType);
 ```
 
 To stop sending messages, call the `powerOff` method:

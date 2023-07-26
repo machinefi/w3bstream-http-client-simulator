@@ -38,12 +38,12 @@ export class Simulator {
     };
   }
 
-  powerOn(intervalInSec: number): void {
+  powerOn(intervalInSec: number, eventType?: string): void {
     const intervalInMs = intervalInSec * 1000;
 
     this._interval = setInterval(async () => {
       try {
-        await this.sendSingleMessage();
+        await this.sendSingleMessage(eventType);
       } catch (e) {
         console.log(e);
         console.log("Stopping simulator due to error");
@@ -61,7 +61,7 @@ export class Simulator {
     }
   }
 
-  async sendSingleMessage(): Promise<{
+  async sendSingleMessage(eventType?: string): Promise<{
     res: AxiosResponse | undefined;
     msg: W3bStreamMessage;
   }> {
@@ -69,6 +69,7 @@ export class Simulator {
 
     const header: WSHeader = {
       device_id: message.deviceId,
+      event_type: eventType,
     };
     const res = await this._client?.publishDirect(header, message);
 
