@@ -1,5 +1,7 @@
 # Simulator README
 
+[![npm](https://img.shields.io/npm/v/@w3bstream/w3bstream-http-client-simulator)](https://www.npmjs.com/package/@w3bstream/w3bstream-http-client-simulator)
+
 This README provides an overview of the Simulator module, which is designed to generate and send simulated data points to the W3BSTREAM server.
 
 ## Table of Contents
