@@ -1,48 +1,41 @@
 import path from "path";
 import fs from "fs";
+import { AxiosResponse } from "axios";
 
-import axios from "axios";
-
-import { Simulator } from ".";
+import { Simulator, NoDataPointGeneratorError } from ".";
 import { DataPointGenerator } from "../DataPointGenerator";
-import { DataPoint } from "./../types";
+import { DataPoint, W3bStreamMessage } from "./../types";
 
-const movePkFile = (oldPath: string, newPath: string): void => {
-  const newPKFile = fs.readFileSync(path.join(oldPath, "private.key"));
-  fs.mkdirSync(newPath, { recursive: true });
-  fs.writeFileSync(path.join(newPath, "private.key"), newPKFile);
-};
+const publishMock = jest.fn().mockImplementation((): Partial<AxiosResponse> => {
+  return {
+    status: 200,
+    statusText: "OK",
+    data: {},
+  };
+});
 
-const removePkFile = (path: string): void => {
-  fs.rmSync(path, { recursive: true, force: true });
-
-  const testingSimulatorPath = path.split("/").slice(0, -1).join("/");
-  const isEmpty = fs.readdirSync(testingSimulatorPath).length === 0;
-
-  if (isEmpty) {
-    fs.rmdirSync(testingSimulatorPath);
-  }
-};
-
-const wait = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+jest.mock("w3bstream-client-js", () => {
+  return {
+    W3bstreamClient: jest.fn().mockImplementation(() => {
+      return {
+        publishDirect: publishMock,
+      };
+    }),
+  };
+});
 
 const PUB_TOKEN_1 = "pub_token_1";
 const PUB_TOKEN_2 = "pub_token_2";
 const W3BSTREAM_ENDPOINT = "http://localhost:3000";
 
-let simulator1: Simulator;
-let simulator2: Simulator;
+describe("simulator", () => {
+  describe("initialize", () => {
+    let simulator1: Simulator;
+    let simulator2: Simulator;
 
-let publicKey1: string;
-let publicKey2: string;
+    let publicKey1: string;
+    let publicKey2: string;
 
-interface TemperatureDataPoint extends DataPoint {
-  temperature: number;
-}
-
-describe("Simulator", () => {
-  describe("Initialization", () => {
     beforeEach(() => {
       simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
       simulator1.init();
@@ -86,125 +79,141 @@ describe("Simulator", () => {
     it("should reuse private.key file if one is provided", () => {
       simulator2 = new Simulator(PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
       simulator2.init();
-      publicKey2 = simulator2.publicKey;
 
-      expect(publicKey1).toEqual(publicKey2);
+      expect(publicKey1).toEqual(simulator2.publicKey);
     });
   });
   describe("Message generation", () => {
+    interface TemperatureDataPoint extends DataPoint {
+      temperature: number;
+    }
+
+    let simulator1: Simulator;
+    let dataGenerator: DataPointGenerator<TemperatureDataPoint>;
+    let message1: W3bStreamMessage;
+
     beforeEach(() => {
       simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
       simulator1.init();
+
+      dataGenerator = new DataPointGenerator<TemperatureDataPoint>(() => ({
+        temperature: DataPointGenerator.randomizer(1, 100),
+        timestamp: DataPointGenerator.timestampGenerator(),
+      }));
+
+      simulator1.dataPointGenerator = dataGenerator;
+
+      message1 = simulator1.generateSingleMessage();
     });
     afterEach(() => {
       fs.rmSync(path.join("./", "private.key"), { force: true });
     });
-    it("should set a data generator", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
-      simulator1.dataPointGenerator = dataGenerator;
-    });
     it("should generate a data point", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
-      simulator1.dataPointGenerator = dataGenerator;
+      const dataPoint = message1.data as TemperatureDataPoint;
 
-      const message = simulator1.generateSingleMessage();
-      const dataPoint = message.data as TemperatureDataPoint;
-
-      expect(dataPoint.temperature).toBeGreaterThanOrEqual(0);
+      expect(dataPoint.temperature).toBeGreaterThanOrEqual(1);
       expect(dataPoint.temperature).toBeLessThanOrEqual(100);
 
-      expect(dataPoint.timestamp).toBeGreaterThanOrEqual(0);
+      expect(dataPoint.timestamp).toBeGreaterThan(Date.now() - 1_000);
     });
     it("should generate two different data points", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
-      simulator1.dataPointGenerator = dataGenerator;
-
-      const message1 = simulator1.generateSingleMessage();
-      const dataPoint1 = message1.data as TemperatureDataPoint;
       const message2 = simulator1.generateSingleMessage();
+
+      const dataPoint1 = message1.data as TemperatureDataPoint;
       const dataPoint2 = message2.data as TemperatureDataPoint;
 
+      expect(dataPoint1.temperature).toBeDefined();
+      expect(dataPoint2.temperature).toBeDefined();
       expect(dataPoint1.temperature).not.toEqual(dataPoint2.temperature);
     });
     it("should generate a payload with a signature", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
-      simulator1.dataPointGenerator = dataGenerator;
-
-      const message = simulator1.generateSingleMessage();
-
-      expect(message.signature).toBeDefined();
+      expect(message1.signature.length).toBeGreaterThan(0);
     });
-    it("should sign a message with the private key", () => {
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
+    it("should throw if no data generator is set", () => {
+      const simulator2 = new Simulator(PUB_TOKEN_2, W3BSTREAM_ENDPOINT);
+      simulator2.init();
+      expect(() => simulator2.generateSingleMessage()).toThrow(
+        NoDataPointGeneratorError
       );
-      simulator1.dataPointGenerator = dataGenerator;
-
-      const message = simulator1.generateSingleMessage();
-
-      const signature = message.signature;
-      expect(signature.length).toBeGreaterThan(0);
     });
   });
-  describe("Sending messages", () => {
+
+  describe("simulation", () => {
+    interface TemperatureDataPoint extends DataPoint {
+      temperature: number;
+    }
+
+    let simulator1: Simulator;
+    let dataGenerator: DataPointGenerator<TemperatureDataPoint>;
+    let mockSendMsg: jest.SpyInstance;
+
     beforeEach(() => {
       simulator1 = new Simulator(PUB_TOKEN_1, W3BSTREAM_ENDPOINT);
       simulator1.init();
-      const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
-        () => ({
-          temperature: DataPointGenerator.randomizer(0, 100),
-          timestamp: DataPointGenerator.timestampGenerator(),
-        })
-      );
+
+      dataGenerator = new DataPointGenerator<TemperatureDataPoint>(() => ({
+        temperature: DataPointGenerator.randomizer(1, 100),
+        timestamp: DataPointGenerator.timestampGenerator(),
+      }));
 
       simulator1.dataPointGenerator = dataGenerator;
+
+      mockSendMsg = jest.spyOn(simulator1, "sendSingleMessage");
     });
     afterEach(() => {
-      fs.rmSync(path.join("./", "private.key"), { force: true });
+      mockSendMsg.mockRestore();
     });
-    it("should send a single message", async () => {
-      jest.spyOn(axios, "post").mockImplementation(() => {
-        return Promise.resolve({ status: 200 });
-      });
-
-      const { res } = await simulator1.sendSingleMessage();
-
-      expect(axios.post).toHaveBeenCalled();
-      expect(res?.status).toEqual(200);
-    });
-    it("should send messages with interval", async () => {
-      jest.spyOn(axios, "post").mockImplementation(() => {
-        return Promise.resolve({ status: 200 });
-      });
+    it("should power on", async () => {
+      jest.useFakeTimers();
 
       simulator1.powerOn(1);
 
-      await wait(2500);
+      jest.spyOn(simulator1, "sendSingleMessage");
+
+      jest.advanceTimersByTime(1_000);
+
+      expect(simulator1.sendSingleMessage).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(1_000);
+
+      expect(simulator1.sendSingleMessage).toHaveBeenCalledTimes(2);
 
       simulator1.powerOff();
+
+      jest.useRealTimers();
     });
+    it("should power off if msg sending fails", async () => {
+      jest.useFakeTimers();
+
+      mockSendMsg.mockRejectedValue(new Error("Error sending message"));
+
+      simulator1.powerOn(1);
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      expect(mockSendMsg).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      expect(mockSendMsg).toHaveBeenCalledTimes(1);
+
+      jest.useRealTimers();
+    });
+
   });
 });
+
+const movePkFile = (oldPath: string, newPath: string): void => {
+  const newPKFile = fs.readFileSync(path.join(oldPath, "private.key"));
+  fs.mkdirSync(newPath, { recursive: true });
+  fs.writeFileSync(path.join(newPath, "private.key"), newPKFile);
+};
+
+const removePkFile = (path: string): void => {
+  fs.rmSync(path, { recursive: true, force: true });
+
+  const testingSimulatorPath = path.split("/").slice(0, -1).join("/");
+  const isEmpty = fs.readdirSync(testingSimulatorPath).length === 0;
+
+  if (isEmpty) {
+    fs.rmdirSync(testingSimulatorPath);
+  }
+};

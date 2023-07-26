@@ -1,22 +1,26 @@
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
+import { W3bstreamClient, WSHeader } from "w3bstream-client-js";
 
-import { SimulatorSigner } from "../SimulatorSigner";
-import { DataPointGenerator } from "../DataPointGenerator";
-import { SimulatorKeys } from "../SimulatorKeys";
-import { PrivateKeyFile } from "../PrivateKeyFile";
+import { SimulatorSigner } from "../SimulatorSigner/index.js";
+import { DataPointGenerator } from "../DataPointGenerator/index.js";
+import { SimulatorKeys } from "../SimulatorKeys/index.js";
+import { PrivateKeyFile } from "../PrivateKeyFile/index.js";
 import { W3bStreamMessage } from "../types";
 
-class NoDataPointGeneratorError extends Error {}
-class SendingMessageError extends Error {}
+export class NoDataPointGeneratorError extends Error {}
+export class SendingMessageError extends Error {}
 
 export class Simulator {
+  private _client: W3bstreamClient | undefined;
   private _privateKey: string = "";
   private _dataPointGenerator: DataPointGenerator<any> | undefined;
   private _interval: NodeJS.Timeout | undefined;
 
   public publicKey: string = "";
 
-  constructor(private pubToken: string, private w3bstreamEndpoint: string) {}
+  constructor(deviceToken: string, httpRoute: string) {
+    this._client = new W3bstreamClient(httpRoute, deviceToken);
+  }
 
   init(pathToPrivateKey?: string) {
     this.initFromPathOrGenerateNew(pathToPrivateKey ?? "./");
@@ -38,11 +42,13 @@ export class Simulator {
     const intervalInMs = intervalInSec * 1000;
 
     this._interval = setInterval(async () => {
-      const { res, msg } = await this.sendSingleMessage();
-      if (res) {
-        this.logSuccessfulMessage(res, msg);
-      } else {
-        this._interval && clearInterval(this._interval);
+      try {
+        await this.sendSingleMessage();
+      } catch (e) {
+        console.log(e);
+        console.log("Stopping simulator due to error");
+
+        this.powerOff();
       }
     }, intervalInMs);
   }
@@ -50,6 +56,8 @@ export class Simulator {
   powerOff(): void {
     if (this._interval) {
       clearInterval(this._interval);
+
+      delete this._interval;
     }
   }
 
@@ -59,22 +67,22 @@ export class Simulator {
   }> {
     const message = this.generateSingleMessage();
 
-    try {
-      const res = await axios.post(this.w3bstreamEndpoint, message, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + this.pubToken,
-        },
-      });
-      if (res.status < 200 || res.status >= 300) {
-        throw new SendingMessageError("Response status is: " + res.status);
-      }
+    const header: WSHeader = {
+      device_id: message.deviceId,
+    };
+    const res = await this._client?.publishDirect(header, message);
 
-      return { res, msg: message };
-    } catch (e) {
-      console.log(e);
-      return { res: undefined, msg: message };
+    if (!res) {
+      throw new SendingMessageError("No response");
     }
+
+    if (res?.status && (res.status < 200 || res.status >= 300)) {
+      throw new SendingMessageError("Response status is: " + res.status);
+    }
+
+    this.logSuccessfulMessage(res, message);
+
+    return { res, msg: message };
   }
 
   set dataPointGenerator(generator: DataPointGenerator<any>) {
@@ -117,12 +125,12 @@ export class Simulator {
   }
 
   private logSuccessfulMessage(
-    res: AxiosResponse,
+    res: AxiosResponse | undefined,
     msg: W3bStreamMessage
   ): void {
     console.log({
-      httpResult: res.status || "",
-      w3bstreamError: res.data?.errMsg || res.data?.error || "",
+      httpResult: res?.status || "",
+      w3bstreamError: res?.data?.errMsg || res?.data?.error || "",
       payload: msg,
     });
   }

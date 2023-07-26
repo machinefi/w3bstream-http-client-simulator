@@ -1,5 +1,7 @@
 # Simulator README
 
+[![npm](https://img.shields.io/npm/v/@w3bstream/w3bstream-http-client-simulator)](https://www.npmjs.com/package/@w3bstream/w3bstream-http-client-simulator)
+
 This README provides an overview of the Simulator module, which is designed to generate and send simulated data points to the W3BSTREAM server.
 
 ## Table of Contents
@@ -14,11 +16,18 @@ This README provides an overview of the Simulator module, which is designed to g
 
 To use the Simulator module, you need to import it along with some dependencies:
 
-```javascript
+```ts
 import {
   Simulator,
   DataPointGenerator,
 } from "@w3bstream/w3bstream-http-client-simulator";
+```
+
+And provide DEVICE_TOKEN and HTTP_ROUTE that can be found in W3bstream project.
+
+```ts
+const api_key = "API_KEY";
+const httpRoute = "HTTP_ROUTE";
 ```
 
 ## Usage
@@ -27,16 +36,16 @@ import {
 
 Deside what the shape of the data point should be:
 
-```javascript
+```ts
 type TemperatureDataPoint = {
   temperature: number;
   timestamp: number;
 };
 ```
 
-And how the data point should be generated, you can use `randomizer` or `timestampGenerator` methods of DataPointGenerator: 
+And how the data point should be generated, you can use `randomizer` or `timestampGenerator` methods of DataPointGenerator:
 
-```javascript
+```ts
 const generatorFunction = () => ({
   temperature: DataPointGenerator.randomizer(0, 100),
   timestamp: DataPointGenerator.timestampGenerator(),
@@ -45,7 +54,7 @@ const generatorFunction = () => ({
 
 And finally, to generate messages, instantiate data generator:
 
-```javascript
+```ts
 const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
   generatorFunction
 );
@@ -55,21 +64,21 @@ const dataGenerator = new DataPointGenerator<TemperatureDataPoint>(
 
 Create a new instance of the `Simulator` class, initialize it and set a `DataPointGenerator` that you created earlier:
 
-```javascript
-const simulator = new Simulator(pubId, pubToken, w3bstreamEndpoint);
+```ts
+const simulator = new Simulator(deviceToken, httpRoute);
 simulator.init();
 simulator.dataPointGenerator = dataGenerator;
 ```
 
-You can also provide an optional `pathToPrivateKey` parameter:
+(OPTIONAL) You can also provide a `pathToPrivateKey` parameter:
 
-```javascript
+```ts
 simulator.init(pathToPrivateKey);
 ```
 
 Now you can generate a message with a single or multiple events:
 
-```javascript
+```ts
 const message = simulator.generateEvents(numberOfDataPoints);
 ```
 
@@ -77,18 +86,21 @@ const message = simulator.generateEvents(numberOfDataPoints);
 
 To send a single message to the server, call the `sendSingleMessage` method:
 
-```javascript
-const res = simulator.sendSingleMessage();
+```ts
+const { res, msg } = await simulator.sendSingleMessage();
+
+console.log("response: ", res?.data);
+console.log("w3bstream message: ", msg);
 ```
 
 To send messages at a specified interval, use the `powerOn` method:
 
-```javascript
+```ts
 simulator.powerOn(intervalInSec);
 ```
 
 To stop sending messages, call the `powerOff` method:
 
-```javascript
+```ts
 simulator.powerOff();
 ```

@@ -25,6 +25,7 @@
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.10",
     "jest": "^29.5.0",
+    "prettier": "^2.8.8",
     "ts-jest": "^29.0.5",
     "typescript": "^5.0.2"
   },
@@ -36,5 +37,8 @@
   "keywords": [
     "w3bstream",
     "iotex"
-  ]
+  ],
+  "dependencies": {
+    "w3bstream-client-js": "^2.0.1"
+  }
 }
