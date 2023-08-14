@@ -71,7 +71,7 @@ export class Simulator {
       device_id: message.deviceId,
       event_type: eventType,
     };
-    const res = await this._client?.publishDirect(header, message);
+    const res = await this._client?.publishSingle(header, message);
 
     if (!res) {
       throw new SendingMessageError("No response");

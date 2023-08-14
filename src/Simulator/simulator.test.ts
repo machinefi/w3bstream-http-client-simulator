@@ -5,6 +5,7 @@ import { AxiosResponse } from "axios";
 import { Simulator, NoDataPointGeneratorError } from ".";
 import { DataPointGenerator } from "../DataPointGenerator";
 import { DataPoint, W3bStreamMessage } from "./../types";
+import { IW3bstreamClient } from "w3bstream-client-js";
 
 const publishMock = jest.fn().mockImplementation((): Partial<AxiosResponse> => {
   return {
@@ -16,9 +17,9 @@ const publishMock = jest.fn().mockImplementation((): Partial<AxiosResponse> => {
 
 jest.mock("w3bstream-client-js", () => {
   return {
-    W3bstreamClient: jest.fn().mockImplementation(() => {
+    W3bstreamClient: jest.fn().mockImplementation((): Partial<IW3bstreamClient> => {
       return {
-        publishDirect: publishMock,
+        publishSingle: publishMock,
       };
     }),
   };
@@ -162,6 +163,7 @@ describe("simulator", () => {
       mockSendMsg.mockRestore();
       fs.rmSync(path.join("./", "private.key"), { force: true });
     });
+
     it("should send a message to a custom event", async () => {
       await simulator1.sendSingleMessage("TEMPERATURE_EVENT");
     });
