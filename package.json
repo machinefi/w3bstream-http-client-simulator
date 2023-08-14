@@ -39,6 +39,6 @@
     "iotex"
   ],
   "dependencies": {
-    "w3bstream-client-js": "^2.0.1"
+    "w3bstream-client-js": "^3.0.0"
   }
 }
